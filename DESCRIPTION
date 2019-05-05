@@ -1,0 +1,27 @@
+Package: Forecast
+Type: Package
+Title: Creates forecast based on historical data
+Version: 0.1.0
+Author: Authors@R: 
+    person("Patrik", "Grandadam", email = "patrik.grandadam@gmail.com",
+    role = c("aut", "cre"))
+Maintainer: The package maintainer <patrik.grandadam@gmail.com>
+Description: This package can be used to generate a baseline from historical sales
+    data, to forecast the baseline in the future, to understand the effect of promotions and
+    to forecast the total demand of a given week. 
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    zoo (>= 1.8-5), 
+    mixtools (>= 1.1.0),
+    ggplot2 (>= 3.1.0),
+    dplyr (>= 0.8.0.1),
+    magrittr (>= 1.5),
+    stringr (>= 1.3.1),
+    knitr (>= 1.21),
+    kableExtra (>= 1.1.0)
+RoxygenNote: 6.1.1
+
+
+
