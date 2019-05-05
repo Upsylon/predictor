@@ -1,4 +1,4 @@
-Package: Forecast
+Package: predictor
 Type: Package
 Title: Creates forecast based on historical data
 Version: 0.1.0
