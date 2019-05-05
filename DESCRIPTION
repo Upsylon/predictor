@@ -21,10 +21,10 @@ Imports:
     stringr (>= 1.3.1),
     knitr (>= 1.21),
     kableExtra (>= 1.1.0),
+    forecast (>= 8.7), 
     fpp2 (>= 2.3),
     astsa (>= 1.8),
-    xts (>= 0.11-2), 
-    forecast (>= 8.7)
+    xts (>= 0.11-2)
 RoxygenNote: 6.1.1
 
 
