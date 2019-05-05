@@ -278,7 +278,7 @@ predict_baseline <- function(sales_data,
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using Neural Network") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
-    scale_x_continuous(breaks = seq(2014, 2020, 1)) +
+    ggplot2::scale_x_continuous(breaks = seq(2014, 2020, 1)) +
     my_theme()
   acc_nnet_baseline <- fcst_nnet_baseline %>% forecast::accuracy(ts_baseline) # accuracy
   mape_nnet_baseline <- acc_nnet_baseline[2, "MAPE"] # MAPE
@@ -348,7 +348,7 @@ predict_baseline <- function(sales_data,
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and STLF") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
-    scale_x_continuous(breaks = seq(2014, 2020, 1)) +
+    ggplot2::scale_x_continuous(breaks = seq(2014, 2020, 1)) +
     my_theme()
   
   acc_boot_stlf_baseline <- forecast::accuracy(fcst_boot_stlf_baseline$mean, ts_baseline)
@@ -419,7 +419,7 @@ predict_baseline <- function(sales_data,
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and nnet") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
-    scale_x_continuous(breaks = seq(2014, 2020, 1)) +
+    ggplot2::scale_x_continuous(breaks = seq(2014, 2020, 1)) +
     my_theme()
   
   acc_boot_nnet_baseline <- forecast::accuracy(fcst_boot_nnet_baseline$mean, ts_baseline)
