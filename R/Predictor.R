@@ -163,9 +163,9 @@ predict_baseline <- function(sales_data,
   # the original data, train and test set converted into a time series
   ts_actuals <- stats::ts(
     sales_data, start = start, end = end, frequency = forecast_horizon)
-  ts_actuals_train <- subset(
+  ts_actuals_train <- base::subset(
     ts_actuals, end = length(ts_actuals) - forecast_horizon) # train set
-  ts_actuals_test <- subset(
+  ts_actuals_test <- base::subset(
     ts_actuals, start = length(ts_actuals) - forecast_horizon + 1) # test set
   
   
@@ -179,9 +179,9 @@ predict_baseline <- function(sales_data,
   original_baseline <- baseline(sales_data, promo_done = promo_done)$baseline
   ts_baseline <- stats::ts(
     original_baseline, start = start, end = end, frequency = forecast_horizon)
-  ts_baseline_train <- subset(
+  ts_baseline_train <- base::subset(
     ts_baseline, end = length(ts_actuals) - forecast_horizon) # train set
-  ts_baseline_test <- subset(
+  ts_baseline_test <- base::subset(
     ts_baseline, start = length(ts_actuals) - forecast_horizon + 1) # test set
   
   
@@ -510,9 +510,9 @@ predict_sales <- function(sales_data,
     # the original data, train and test set converted into a time series
     ts_actuals <- stats::ts(
       sales_data, start = start, end = end, frequency = forecast_horizon)
-    ts_actuals_train <- subset(
+    ts_actuals_train <- base::subset(
       ts_actuals, end = length(ts_actuals) - forecast_horizon) # train set
-    ts_actuals_test <- subset(
+    ts_actuals_test <- base::subset(
       ts_actuals, start = length(ts_actuals) - forecast_horizon + 1) # test set
     
     
