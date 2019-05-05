@@ -552,7 +552,6 @@ predict_sales <- function(sales_data,
     acc_arima_actuals <- fcst_arima_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     mape_arima_actuals <- acc_arima_actuals[2, "MAPE"] # MAPE
     arima_model <- list(NAME = "Arima model",
-                        MODEL = arima_future_model,
                         TEST_SET = fcst_arima_actuals$mean,
                         FORECAST = fcst_arima_future$mean,
                         lower_95 = fcst_arima_future$lower,
@@ -587,7 +586,6 @@ predict_sales <- function(sales_data,
     acc_stlf_actuals <- fcst_stlf_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     mape_stlf_actuals <- acc_stlf_actuals[2, "MAPE"] # MAPE
     stlf_model <- list(NAME = "stlf model",
-                       MODEL = stlf_future_model,
                        TEST_SET = fcst_stlf_actuals$mean,
                        FORECAST = fcst_stlf_future$mean,
                        lower_95 = fcst_stlf_future$lower,
@@ -619,7 +617,6 @@ predict_sales <- function(sales_data,
     mape_nnet_actuals <- acc_nnet_actuals[2, "MAPE"] # MAPE
     nnet_model <- list(NAME = "nnet model",
                        TEST_SET = fcst_nnet_actuals$mean,
-                       MODEL = nnet_future_model,
                        FORECAST = fcst_nnet_future$mean,
                        lower_95 = fcst_nnet_future$lower,
                        Upper_95 = fcst_nnet_future$upper,
