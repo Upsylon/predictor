@@ -5,7 +5,8 @@
 \title{Creates the forecast of the baseline of sales based on historical data}
 \usage{
 predict_baseline(sales_data, frequency = 52, start = c(2014, 1),
-  end = c(2019, 12), forecast_horizon = 52, promo_done = FALSE)
+  end = c(2019, 12), forecast_horizon = 52, promo_done = FALSE,
+  criterion = "MAPE")
 }
 \arguments{
 \item{sales_data}{A vector containing historical sales data}
@@ -21,6 +22,9 @@ It contains first the year and then the day/week/month according to your data.}
 \item{forecast_horizon}{An integer value specifying the number of observations to forecast.}
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
+
+\item{criterion}{A string variable specifying the selection criterion that should be used to
+select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the

@@ -144,6 +144,8 @@ baseline <- function(sales_data,
 #' It contains first the year and then the day/week/month according to your data.
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
 #' @param promo_done A logical variable specifying if promotions are done for the product.
+#' @param criterion A string variable specifying the selection criterion that should be used to
+#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervals, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -157,8 +159,8 @@ predict_baseline <- function(sales_data,
                              start = c(2014, 1),
                              end = c(2019, 12),
                              forecast_horizon = 52,
-                             promo_done = FALSE
-) {
+                             promo_done = FALSE, 
+                             criterion = "MAPE") {
   
   # the original data, train and test set converted into a time series
   ts_actuals <- stats::ts(
@@ -211,7 +213,7 @@ predict_baseline <- function(sales_data,
     ggplot2::ylab("Sales") +
     my_theme()
   acc_arima_baseline <- fcst_arima_baseline %>% forecast::accuracy(ts_baseline) # accuracy
-  mape_arima_baseline <- acc_arima_baseline[2, "MAPE"] # MAPE
+  criterion_arima_baseline <- acc_arima_baseline[2, criterion] # MAPE
   arima_model_baseline <- list(NAME = "Arima model",
                                TEST_SET = fcst_arima_baseline$mean,
                                FORECAST = fcst_arima_future$mean,
@@ -219,7 +221,7 @@ predict_baseline <- function(sales_data,
                                Upper_95 = fcst_arima_future$upper,
                                PLOT = plot_arima_baseline,
                                ACCURACIES = acc_arima_baseline,
-                               MAPE = mape_arima_baseline)
+                               CRITERION =  criterion_arima_baseline)
   
   ## stlf on the baseline
   stlf_baseline_train <- ts_baseline_train %>% forecast::stlf(level = 0.95) # stlf on train set
@@ -249,7 +251,7 @@ predict_baseline <- function(sales_data,
     ggplot2::ylab("Sales") +
     my_theme()
   acc_stlf_baseline <- fcst_stlf_baseline %>% forecast::accuracy(ts_baseline) # accuracy
-  mape_stlf_baseline <- acc_stlf_baseline[2, "MAPE"] # MAPE
+  criterion_stlf_baseline <- acc_stlf_baseline[2, criterion] # MAPE
   stlf_model_baseline <- list(NAME = "stlf model",
                               TEST_SET = fcst_stlf_baseline$mean,
                               FORECAST = fcst_stlf_baseline_future$mean,
@@ -257,7 +259,7 @@ predict_baseline <- function(sales_data,
                               Upper_95 = fcst_stlf_baseline_future$upper,
                               PLOT = plot_stlf_baseline,
                               ACCURACIES = acc_stlf_baseline,
-                              MAPE = mape_stlf_baseline)
+                              CRITERION =  criterion_stlf_baseline)
   
   
   ## nnet on the baseline
@@ -281,7 +283,7 @@ predict_baseline <- function(sales_data,
     ggplot2::scale_x_continuous(breaks = seq(2014, 2020, 1)) +
     my_theme()
   acc_nnet_baseline <- fcst_nnet_baseline %>% forecast::accuracy(ts_baseline) # accuracy
-  mape_nnet_baseline <- acc_nnet_baseline[2, "MAPE"] # MAPE
+  criterion_nnet_baseline <- acc_nnet_baseline[2, criterion] # MAPE
   nnet_model_baseline <- list(NAME = "nnet model",
                               TEST_SET = fcst_nnet_baseline$mean,
                               FORECAST = fcst_nnet_baseline_future$mean,
@@ -289,7 +291,7 @@ predict_baseline <- function(sales_data,
                               Upper_95 = fcst_nnet_baseline_future$upper,
                               PLOT = plot_nnet_baseline,
                               ACCURACIES = acc_nnet_baseline,
-                              MAPE = mape_nnet_baseline)
+                              CRITERION =  criterion_nnet_baseline)
   
   
   ### bootstrapping on historical data
@@ -352,7 +354,7 @@ predict_baseline <- function(sales_data,
     my_theme()
   
   acc_boot_stlf_baseline <- forecast::accuracy(fcst_boot_stlf_baseline$mean, ts_baseline)
-  mape_boot_stlf_baseline <- acc_boot_stlf_baseline[, "MAPE"] # MAPE
+  criterion_boot_stlf_baseline <- acc_boot_stlf_baseline[, criterion] # MAPE
   boot_stlf_model_baseline <- list(NAME = "boot_stlf model",
                                    TEST_SET = fcst_boot_stlf_baseline$mean,
                                    FORECAST = fcst_boot_stlf_future$mean,
@@ -360,7 +362,7 @@ predict_baseline <- function(sales_data,
                                    Upper_95 = fcst_boot_stlf_future$upper,
                                    PLOT = plot_boot_stlf_baseline,
                                    ACCURACIES = acc_boot_stlf_baseline,
-                                   MAPE = mape_boot_stlf_baseline)
+                                   CRITERION =  criterion_boot_stlf_baseline)
   
   
   
@@ -423,7 +425,7 @@ predict_baseline <- function(sales_data,
     my_theme()
   
   acc_boot_nnet_baseline <- forecast::accuracy(fcst_boot_nnet_baseline$mean, ts_baseline)
-  mape_boot_nnet_baseline <- acc_boot_nnet_baseline[, "MAPE"] # MAPE
+  criterion_boot_nnet_baseline <- acc_boot_nnet_baseline[, criterion] # MAPE
   
   boot_nnet_model_baseline <- list(NAME = "boot_nnet model",
                                    TEST_SET = fcst_boot_nnet_baseline$mean,
@@ -432,25 +434,25 @@ predict_baseline <- function(sales_data,
                                    Upper_95 = fcst_boot_nnet_future$upper,
                                    PLOT = plot_boot_nnet_baseline,
                                    ACCURACIES = acc_boot_nnet_baseline,
-                                   MAPE = mape_boot_nnet_baseline)
+                                   CRITERION =  criterion_boot_nnet_baseline)
   
   
   
-  mapes <- c(mape_arima_baseline = mape_arima_baseline,
-             mape_boot_nnet_baseline = mape_boot_nnet_baseline,
-             mape_boot_stlf_baseline = mape_boot_stlf_baseline,
-             mape_nnet_baseline = mape_nnet_baseline,
-             mape_stlf_baseline = mape_stlf_baseline)
+  criterions <- c(criterion_arima_baseline = criterion_arima_baseline,
+             criterion_boot_nnet_baseline = criterion_boot_nnet_baseline,
+             criterion_boot_stlf_baseline = criterion_boot_stlf_baseline,
+             criterion_nnet_baseline = criterion_nnet_baseline,
+             criterion_stlf_baseline = criterion_stlf_baseline)
   
-  if(names(which.min(mapes)) ==  "mape_arima_baseline") {
+  if(names(which.min(criterions)) ==  "criterion_arima_baseline") {
     retained_model <- arima_model_baseline
-  } else if(names(which.min(mapes)) ==  "mape_boot_nnet_baseline") {
+  } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_baseline") {
     retained_model <- boot_nnet_model_baseline
-  } else if(names(which.min(mapes)) ==  "mape_boot_stlf_baseline") {
+  } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_baseline") {
     retained_model <- boot_stlf_model_baseline
-  } else if(names(which.min(mapes)) ==  "mape_nnet_baseline") {
+  } else if(names(which.min(criterions)) ==  "criterion_nnet_baseline") {
     retained_model <- nnet_model_baseline
-  } else if(names(which.min(mapes)) ==  "mape_stlf_baseline") {
+  } else if(names(which.min(criterions)) ==  "criterion_stlf_baseline") {
     retained_model <- stlf_model_baseline
   }
   
@@ -461,10 +463,6 @@ predict_baseline <- function(sales_data,
                                 bootstrapped_stlf_baseline = boot_stlf_model_baseline,
                                 neural_network = nnet_model_baseline,
                                 stlf_baseline =   stlf_model_baseline)))
-  
-  
-  
-  
   
 }
 
@@ -483,6 +481,8 @@ predict_baseline <- function(sales_data,
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param future_promotions Optionnal: a vector composed on binary variables which are
 #' equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.
+#' @param criterion A string variable specifying the selection criterion that should be used to
+#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervales, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -498,7 +498,8 @@ predict_sales <- function(sales_data,
                           end = c(2019, 12),
                           forecast_horizon = 52,
                           promo_done = FALSE,
-                          future_promotions = NA) {
+                          future_promotions = NA,
+                          criterion = "MAPE") {
   
   if (length(future_promotions) != forecast_horizon && !is.na(future_promotions)) {
     warning("future_promotions should be the same length as the forecasting horizon")
@@ -550,7 +551,7 @@ predict_sales <- function(sales_data,
       ggplot2::ylab("Sales") +
       my_theme()
     acc_arima_actuals <- fcst_arima_actuals %>% forecast::accuracy(ts_actuals) # accuracy
-    mape_arima_actuals <- acc_arima_actuals[2, "MAPE"] # MAPE
+    criterion_arima_actuals <- acc_arima_actuals[2, criterion] # MAPE
     arima_model <- list(NAME = "Arima model",
                         TEST_SET = fcst_arima_actuals$mean,
                         FORECAST = fcst_arima_future$mean,
@@ -558,7 +559,7 @@ predict_sales <- function(sales_data,
                         Upper_95 = fcst_arima_future$upper,
                         PLOT = plot_arima_actuals,
                         ACCURACIES = acc_arima_actuals,
-                        MAPE = mape_arima_actuals)
+                        CRITERION =  criterion_arima_actuals)
     
     ## stlf on historic data
     stlf_actuals_train <- ts_actuals_train %>% forecast::stlf(level = 0.95) # stlf on train set
@@ -584,7 +585,7 @@ predict_sales <- function(sales_data,
       ggplot2::ylab("Sales") +
       my_theme()
     acc_stlf_actuals <- fcst_stlf_actuals %>% forecast::accuracy(ts_actuals) # accuracy
-    mape_stlf_actuals <- acc_stlf_actuals[2, "MAPE"] # MAPE
+    criterion_stlf_actuals <- acc_stlf_actuals[2, criterion] 
     stlf_model <- list(NAME = "stlf model",
                        TEST_SET = fcst_stlf_actuals$mean,
                        FORECAST = fcst_stlf_future$mean,
@@ -592,7 +593,7 @@ predict_sales <- function(sales_data,
                        Upper_95 = fcst_stlf_future$upper,
                        PLOT = plot_stlf_actuals,
                        ACCURACIES = acc_stlf_actuals,
-                       MAPE = mape_stlf_actuals)
+                       CRITERION =  criterion_stlf_actuals)
     
     
     ## nnet on historic data
@@ -614,7 +615,7 @@ predict_sales <- function(sales_data,
       
       my_theme()
     acc_nnet_actuals <- fcst_nnet_actuals %>% forecast::accuracy(ts_actuals) # accuracy
-    mape_nnet_actuals <- acc_nnet_actuals[2, "MAPE"] # MAPE
+    criterion_nnet_actuals <- acc_nnet_actuals[2, criterion] 
     nnet_model <- list(NAME = "nnet model",
                        TEST_SET = fcst_nnet_actuals$mean,
                        FORECAST = fcst_nnet_future$mean,
@@ -622,7 +623,7 @@ predict_sales <- function(sales_data,
                        Upper_95 = fcst_nnet_future$upper,
                        PLOT = plot_nnet_actuals,
                        ACCURACIES = acc_nnet_actuals,
-                       MAPE = mape_nnet_actuals)
+                       CRITERION =  criterion_nnet_actuals)
     
     
     
@@ -692,7 +693,7 @@ predict_sales <- function(sales_data,
       my_theme()
     
     acc_boot_stlf_actuals <- forecast::accuracy(fcst_boot_stlf_actuals$mean, ts_actuals)
-    mape_boot_stlf_actuals <- acc_boot_stlf_actuals[, "MAPE"] # MAPE
+    criterion_boot_stlf_actuals <- acc_boot_stlf_actuals[, criterion] 
     
     
     boot_stlf_model <- list(NAME = "boot_stlf model",
@@ -702,7 +703,7 @@ predict_sales <- function(sales_data,
                             Upper_95 = fcst_boot_stlf_future$upper,
                             PLOT = plot_boot_stlf_actuals,
                             ACCURACIES = acc_boot_stlf_actuals,
-                            MAPE = mape_boot_stlf_actuals)
+                            CRITERION =  criterion_boot_stlf_actuals)
     
     ### using nnet on the bootstrapped series
     fcst_boot_nnet <- matrix(0, ncol = n.boot, nrow = forecast_horizon)
@@ -764,7 +765,7 @@ predict_sales <- function(sales_data,
       my_theme()
     
     acc_boot_nnet_actuals <- forecast::accuracy(fcst_boot_nnet_actuals$mean, ts_actuals)
-    mape_boot_nnet_actuals <- acc_boot_nnet_actuals[, "MAPE"] # MAPE
+    criterion_boot_nnet_actuals <- acc_boot_nnet_actuals[, criterion] 
     
     
     boot_nnet_model <- list(NAME = "boot_nnet model",
@@ -774,7 +775,7 @@ predict_sales <- function(sales_data,
                             Upper_95 = fcst_boot_nnet_future$upper,
                             PLOT = plot_boot_nnet_actuals,
                             ACCURACIES = acc_boot_nnet_actuals,
-                            MAPE = mape_boot_nnet_actuals)
+                            CRITERION =  criterion_boot_nnet_actuals)
     
     if(promo_done == TRUE) {
       promos <- baseline(sales_data, promo_done = TRUE)$promotions %>% as.vector()
@@ -806,14 +807,14 @@ predict_sales <- function(sales_data,
         ggplot2::ylab("Sales") +
         my_theme()
       acc_dyna_actuals <- fcst_dyna_actuals %>% forecast::accuracy(ts_actuals) # accuracy
-      mape_dyna_actuals <- acc_dyna_actuals[2, "MAPE"] # MAPE
+      criterion_dyna_actuals <- acc_dyna_actuals[2, criterion] 
       
     } else {
       dyna_actuals_train <- NULL
       fcst_dyna_actuals <- NULL
       plot_dyna_actuals <- NULL
       acc_dyna_actuals <- NULL
-      mape_dyna_actuals <- 10^8
+      criterion_dyna_actuals <- 10^8
     }
     
     dyna_model <- list(NAME = "Dynamic model",
@@ -822,27 +823,27 @@ predict_sales <- function(sales_data,
                        Upper_95 = fcst_dyna_actuals$upper,
                        PLOT = plot_dyna_actuals,
                        ACCURACIES = acc_dyna_actuals,
-                       MAPE = mape_dyna_actuals)
+                       CRITERION =  criterion_dyna_actuals)
     
     # performance of each model
-    mapes <- c(mape_arima_actuals = mape_arima_actuals,
-               mape_boot_nnet_actuals = mape_boot_nnet_actuals,
-               mape_boot_stlf_actuals = mape_boot_stlf_actuals,
-               mape_dyna_actuals = mape_dyna_actuals,
-               mape_nnet_actuals = mape_nnet_actuals,
-               mape_stlf_actuals = mape_stlf_actuals)
+    criterions <- c(criterion_arima_actuals = criterion_arima_actuals,
+               criterion_boot_nnet_actuals = criterion_boot_nnet_actuals,
+               criterion_boot_stlf_actuals = criterion_boot_stlf_actuals,
+               criterion_dyna_actuals = criterion_dyna_actuals,
+               criterion_nnet_actuals = criterion_nnet_actuals,
+               criterion_stlf_actuals = criterion_stlf_actuals)
     
-    if(names(which.min(mapes)) ==  "mape_arima_actuals") {
+    if(names(which.min(criterions)) ==  "criterion_arima_actuals") {
       retained_model <- arima_model
-    } else if(names(which.min(mapes)) ==  "mape_boot_nnet_actuals") {
+    } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_actuals") {
       retained_model <- boot_nnet_model
-    } else if(names(which.min(mapes)) ==  "mape_boot_stlf_actuals") {
+    } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_actuals") {
       retained_model <- boot_stlf_model
-    } else if(names(which.min(mapes)) ==  "mape_dyna_actuals") {
+    } else if(names(which.min(criterions)) ==  "criterion_dyna_actuals") {
       retained_model <- dyna_model
-    } else if(names(which.min(mapes)) ==  "mape_nnet_actuals") {
+    } else if(names(which.min(criterions)) ==  "criterion_nnet_actuals") {
       retained_model <- nnet_model
-    } else if(names(which.min(mapes)) ==  "mape_stlf_actuals") {
+    } else if(names(which.min(criterions)) ==  "criterion_stlf_actuals") {
       retained_model <- stlf_model
     }
     
@@ -853,7 +854,7 @@ predict_sales <- function(sales_data,
                                   bootstrapped_stlf= boot_stlf_model,
                                   dynamic_model = dyna_model,
                                   neural_network = nnet_model,
-                                  stlf_baseline =   stlf_model)))
+                                  stlf_model = stlf_model)))
     
     
   }
