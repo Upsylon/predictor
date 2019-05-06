@@ -10,10 +10,10 @@ library(predictor) # load the package
 ## Utilisation :computer:
 
 The package is composed of four functions:
-    - baseline()
-    - predict_baseline()
-    - predict_sales()
-    - my_theme()
+    - baseline()  
+    - predict_baseline()  
+    - predict_sales()  
+    - my_theme()  
     
 To understand their way of working and the arguments, please refer to the help of the concerned functions.
 
