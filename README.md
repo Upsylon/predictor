@@ -17,3 +17,5 @@ The package is composed of four functions:
     
 To understand their way of working and the arguments, please refer to the help of the concerned functions.
 
+
+

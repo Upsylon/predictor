@@ -165,12 +165,10 @@ predict_baseline <- function(sales_data,
   # the original data, train and test set converted into a time series
   ts_actuals <- stats::ts(
     sales_data, start = start, end = end, frequency = forecast_horizon)
-  ts_actuals_train <- base::subset(
-    ts_actuals, end = length(ts_actuals) - forecast_horizon) # train set
-  ts_actuals_test <- base::subset(
-    ts_actuals, start = length(ts_actuals) - forecast_horizon + 1) # test set
-  
-  
+
+  ts_actuals_train <- head(ts_actuals, length(ts_actuals) - forecast_horizon)
+  ts_actuals_test <- tail(ts_actuals, length(ts_actuals) - length(ts_actuals_train))
+
   # Creation of training and testing set (not time series format)
   size.tr.set <- length(sales_data) - forecast_horizon
   size.te.set <- forecast_horizon
@@ -181,11 +179,10 @@ predict_baseline <- function(sales_data,
   original_baseline <- baseline(sales_data, promo_done = promo_done)$baseline
   ts_baseline <- stats::ts(
     original_baseline, start = start, end = end, frequency = forecast_horizon)
-  ts_baseline_train <- base::subset(
-    ts_baseline, end = length(ts_actuals) - forecast_horizon) # train set
-  ts_baseline_test <- base::subset(
-    ts_baseline, start = length(ts_actuals) - forecast_horizon + 1) # test set
   
+  ts_baseline_train <- head(ts_baseline, length(ts_actuals) - forecast_horizon)
+  
+  ts_baseline_test <- tail(ts_baseline, length(ts_actuals) - length(ts_actuals_train))
   
   ## auto.arima on the baseline
   arima_baseline_train <- ts_baseline_train %>% forecast::auto.arima() # arima on train set
@@ -511,10 +508,8 @@ predict_sales <- function(sales_data,
     # the original data, train and test set converted into a time series
     ts_actuals <- stats::ts(
       sales_data, start = start, end = end, frequency = forecast_horizon)
-    ts_actuals_train <- base::subset(
-      ts_actuals, end = length(ts_actuals) - forecast_horizon) # train set
-    ts_actuals_test <- base::subset(
-      ts_actuals, start = length(ts_actuals) - forecast_horizon + 1) # test set
+    ts_actuals_train <- head(ts_actuals, length(ts_actuals) - forecast_horizon)
+    ts_actuals_test <- tail(ts_actuals, length(ts_actuals) - length(ts_actuals_train))
     
     
     # Creation of training and testing set (not time series format)
