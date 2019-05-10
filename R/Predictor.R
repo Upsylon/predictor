@@ -292,7 +292,7 @@ predict_baseline <- function(sales_data,
   
   
   ### bootstrapping on historical data
-  n.boot <- 200L # number of simulations
+  n.boot <- 120L # number of simulations
   boot_train_baseline <- ts_baseline_train %>%
     forecast::bld.mbb.bootstrap(num = n.boot)
   boot_baseline <- ts_baseline %>%
@@ -500,6 +500,9 @@ predict_sales <- function(sales_data,
   
   if (length(future_promotions) != forecast_horizon && !is.na(future_promotions)) {
     warning("future_promotions should be the same length as the forecasting horizon")
+  } else if (promo_done == TRUE && is.na(future_promotions)) {
+    warning("If the product is subject to historical promotions, you also have to
+            specify the future promotions")
   } else {
     
     # changing NA to 0
@@ -523,11 +526,9 @@ predict_sales <- function(sales_data,
     
     
     ## auto.arima on historic data
-    arima_actuals_train <- ts_actuals_train %>% forecast::auto.arima() # arima on train set
-    fcst_arima_actuals <- arima_actuals_train %>%
-      forecast::forecast(h = forecast_horizon, level = 0.95) # forecasts actuals test
-    arima_future_model <- ts_actuals %>% forecast::auto.arima()
-    fcst_arima_future <- arima_future_model %>%
+    fcst_arima_actuals <- ts_actuals_train %>% forecast::auto.arima() %>%
+      forecast::forecast(h = forecast_horizon, level = 0.95) # arima on train set
+    fcst_arima_future <- ts_actuals %>% forecast::auto.arima() %>%
       forecast::forecast(h = forecast_horizon, level = 0.95) # arima on everything
     
     plot_arima_actuals <- ggplot2::autoplot(ts_actuals_test) +
@@ -535,10 +536,12 @@ predict_sales <- function(sales_data,
       ggplot2::autolayer(ts_actuals, series = "Actuals") +
       ggplot2::autolayer(fcst_arima_actuals, series = "Forecast on testing set", level = FALSE) +
       ggplot2::geom_ribbon(data = ts_actuals_test,
-                           ggplot2::aes(ymin = fcst_arima_actuals$lower, ymax = fcst_arima_actuals$upper),
+                           ggplot2::aes(ymin = fcst_arima_actuals$lower, 
+                                        ymax = fcst_arima_actuals$upper),
                            fill = "blue", alpha = "0.3") +
       ggplot2::geom_ribbon(data = fcst_arima_future$mean,
-                           ggplot2::aes(ymin = fcst_arima_future$lower, ymax = fcst_arima_future$upper),
+                           ggplot2::aes(ymin = fcst_arima_future$lower, 
+                                        ymax = fcst_arima_future$upper),
                            fill = "red", alpha = "0.3") +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle("Actuals and forecasted total sales using ARIMA") +
@@ -557,11 +560,9 @@ predict_sales <- function(sales_data,
                         CRITERION =  criterion_arima_actuals)
     
     ## stlf on historic data
-    stlf_actuals_train <- ts_actuals_train %>% forecast::stlf(level = 0.95) # stlf on train set
-    fcst_stlf_actuals <- stlf_actuals_train %>%
-      forecast::forecast(h = forecast_horizon) # forecasts actuals test
-    stlf_future_model <- ts_actuals %>% forecast::stlf(level = 0.95)
-    fcst_stlf_future <- stlf_future_model %>%
+    fcst_stlf_actuals <- ts_actuals_train %>% forecast::stlf(level = 0.95) %>%
+      forecast::forecast(h = forecast_horizon) # stlf on train set
+    fcst_stlf_future <- ts_actuals %>% forecast::stlf(level = 0.95) %>%
       forecast::forecast(h = forecast_horizon) # stlf on everything
     
     plot_stlf_actuals <- ggplot2::autoplot(ts_actuals_test) +
@@ -569,10 +570,12 @@ predict_sales <- function(sales_data,
       ggplot2::autolayer(ts_actuals, series = "Actuals") +
       ggplot2::autolayer(fcst_stlf_actuals, series = "Forecast on testing set", level = FALSE) +
       ggplot2::geom_ribbon(data = ts_actuals_test,
-                           ggplot2::aes(ymin = fcst_stlf_actuals$lower, ymax = fcst_stlf_actuals$upper),
+                           ggplot2::aes(ymin = fcst_stlf_actuals$lower, 
+                                        ymax = fcst_stlf_actuals$upper),
                            fill = "blue", alpha = "0.3") +
       ggplot2::geom_ribbon(data = fcst_stlf_future$mean,
-                           ggplot2::aes(ymin = fcst_stlf_future$lower, ymax = fcst_stlf_future$upper),
+                           ggplot2::aes(ymin = fcst_stlf_future$lower, 
+                                        ymax = fcst_stlf_future$upper),
                            fill = "red", alpha = "0.3") +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle("Actuals and forecasted total sales using STLF") +
@@ -592,11 +595,9 @@ predict_sales <- function(sales_data,
     
     
     ## nnet on historic data
-    nnet_actuals_train <- ts_actuals_train %>% forecast::nnetar(level = 0.95) # nnet on train set
-    fcst_nnet_actuals <- nnet_actuals_train %>%
-      forecast::forecast(h = forecast_horizon) # forecasts actuals test
-    nnet_future_model <- ts_actuals %>% forecast::nnetar(level = 0.95)
-    fcst_nnet_future <- nnet_future_model %>%
+    fcst_nnet_actuals <- ts_actuals_train %>% forecast::nnetar(level = 0.95) %>%
+      forecast::forecast(h = forecast_horizon) # nnet on train set
+    fcst_nnet_future <- ts_actuals %>% forecast::nnetar(level = 0.95) %>%
       forecast::forecast(h = forecast_horizon) # nnet on everything
     
     plot_nnet_actuals <- ggplot2::autoplot(ts_actuals_test) +
@@ -607,7 +608,6 @@ predict_sales <- function(sales_data,
       ggplot2::ggtitle("Actuals and forecasted total sales using Neural Network") +
       ggplot2::xlab("Years") +
       ggplot2::ylab("Sales") +
-      
       my_theme()
     acc_nnet_actuals <- fcst_nnet_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     criterion_nnet_actuals <- acc_nnet_actuals[2, criterion] 
@@ -622,13 +622,8 @@ predict_sales <- function(sales_data,
     
     
     
-    
-    
-    
-    
-    
     ### bootstrapping on historical data
-    n.boot <- 200L # number of simulations
+    n.boot <- 120L # number of simulations
     boot_train <- ts_actuals_train %>%
       forecast::bld.mbb.bootstrap(num = n.boot)
     boot_actuals <- ts_actuals %>%
@@ -684,9 +679,7 @@ predict_sales <- function(sales_data,
       ggplot2::ggtitle("Actuals and forecasted total sales using bootstrap and STLF") +
       ggplot2::xlab("Years") +
       ggplot2::ylab("Sales") +
-      
       my_theme()
-    
     acc_boot_stlf_actuals <- forecast::accuracy(fcst_boot_stlf_actuals$mean, ts_actuals)
     criterion_boot_stlf_actuals <- acc_boot_stlf_actuals[, criterion] 
     
@@ -756,7 +749,6 @@ predict_sales <- function(sales_data,
       ggplot2::ggtitle("Actuals and forecasted total sales using bootstrap and Neural Network") +
       ggplot2::xlab("Years") +
       ggplot2::ylab("Sales") +
-      
       my_theme()
     
     acc_boot_nnet_actuals <- forecast::accuracy(fcst_boot_nnet_actuals$mean, ts_actuals)
@@ -791,10 +783,12 @@ predict_sales <- function(sales_data,
         ggplot2::autolayer(ts_actuals, series = "Actuals") +
         ggplot2::autolayer(fcst_dyna_actuals, series = "Forecast on testing set", level = FALSE) +
         ggplot2::geom_ribbon(data = ts_actuals_test,
-                             ggplot2::aes(ymin = fcst_dyna_actuals$lower, ymax = fcst_dyna_actuals$upper),
+                             ggplot2::aes(ymin = fcst_dyna_actuals$lower, 
+                                          ymax = fcst_dyna_actuals$upper),
                              fill = "blue", alpha = "0.3") +
         ggplot2::geom_ribbon(data = fcst_dyna_future$mean,
-                             ggplot2::aes(ymin = fcst_dyna_future$lower, ymax = fcst_dyna_future$upper),
+                             ggplot2::aes(ymin = fcst_dyna_future$lower, 
+                                          ymax = fcst_dyna_future$upper),
                              fill = "red", alpha = "0.3") +
         ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
         ggplot2::ggtitle("Actuals and forecasted total sales using a dynamic model") +
@@ -842,7 +836,7 @@ predict_sales <- function(sales_data,
       retained_model <- stlf_model
     }
     
-    
+
     return(list(selected_model = retained_model,
                 all_models = list(arima = arima_model,
                                   bootstrapped_nnet = boot_nnet_model,
@@ -850,13 +844,15 @@ predict_sales <- function(sales_data,
                                   dynamic_model = dyna_model,
                                   neural_network = nnet_model,
                                   stlf_model = stlf_model)))
-    
-    
+  
   }
 }
 
 
-
+# finalMatrix <- foreach(i=1:115, .combine = cbind) %dopar% {
+#   tempMatrix = predict_sales(mydata[,i+3]) #calling a function
+#   tempMatrix #Equivalent to finalMatrix = cbind(finalMatrix, tempMatrix)
+# }
 
 
 
