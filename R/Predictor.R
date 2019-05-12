@@ -143,6 +143,7 @@ baseline <- function(sales_data,
 #' @param end A vector of length 2 with the date of the last observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
+#' @param size.te.test A integer value specifying the size of the training set 
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param criterion A string variable specifying the selection criterion that should be used to
 #' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").
@@ -159,21 +160,21 @@ predict_baseline <- function(sales_data,
                              start = c(2014, 1),
                              end = c(2019, 12),
                              forecast_horizon = 52,
+                             size.te.test = 52,
                              promo_done = FALSE, 
                              criterion = "MAPE") {
   
   # the original data, train and test set converted into a time series
   ts_actuals <- stats::ts(
-    sales_data, start = start, end = end, frequency = forecast_horizon)
+    sales_data, start = start, end = end, frequency = frequency)
 
-  ts_actuals_train <- head(ts_actuals, length(ts_actuals) - forecast_horizon)
+  ts_actuals_train <- head(ts_actuals, length(ts_actuals) - size.te.test)
   ts_actuals_test <- tail(ts_actuals, length(ts_actuals) - length(ts_actuals_train))
 
   # Creation of training and testing set (not time series format)
-  size.tr.set <- length(sales_data) - forecast_horizon
-  size.te.set <- forecast_horizon
+  size.tr.set <- length(sales_data) - size.te.test
   tr.set <- sales_data[1:size.tr.set]
-  te.set <- sales_data[(size.tr.set+1):length(sales_data)]
+  te.set <- sales_data[(size.tr.set + 1):length(sales_data)]
   
   # Creation of the baseline and training/testing set of the baseline
   original_baseline <- baseline(sales_data, promo_done = promo_done)$baseline
@@ -183,6 +184,46 @@ predict_baseline <- function(sales_data,
   ts_baseline_train <- head(ts_baseline, length(ts_actuals) - forecast_horizon)
   
   ts_baseline_test <- tail(ts_baseline, length(ts_actuals) - length(ts_actuals_train))
+  
+  ## STL + ARIMA
+  
+  fcst_stl_arima_baseline <- ts_baseline_train %>%
+    forecast::forecast(method = "arima", h = forecast_horizon, level = 0.95)
+  fcst_stl_arima_future <- ts_baseline %>%
+    forecast::forecast(method = "arima", h = forecast_horizon, level = 0.95)
+  
+  plot_stl_arima_baseline <- ggplot2::autoplot(ts_baseline_test) +
+    ggplot2::autolayer(fcst_stl_arima_future, series = "Forecast of future sales", level = FALSE) +
+    ggplot2::autolayer(ts_baseline, series = "baseline") +
+    ggplot2::autolayer(fcst_stl_arima_baseline, series = "Forecast on testing set", level = FALSE) +
+    ggplot2::geom_ribbon(data = ts_baseline_test,
+                         ggplot2::aes(ymin = fcst_stl_arima_baseline$lower,
+                                      ymax = fcst_stl_arima_baseline$upper),
+                         fill = "blue", alpha = "0.3") +
+    ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
+                         ggplot2::aes(ymin = fcst_stl_arima_future$lower,
+                                      ymax = fcst_stl_arima_future$upper),
+                         fill = "red", alpha = "0.3") +
+    ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n", 
+                            fcst_stl_arima_future$method)) +
+    ggplot2::xlab("Years") +
+    ggplot2::ylab("Sales") +
+    my_theme()
+  
+  acc_stl_arima_baseline <- fcst_stl_arima_baseline %>% forecast::accuracy(ts_baseline) # accuracy
+  criterion_stl_arima_baseline <- acc_stl_arima_baseline[2, criterion] # MAPE
+  stl_arima_model <- list(MODEL = fcst_stl_arima_future$method,
+                          TEST_SET = fcst_stl_arima_baseline$mean,
+                          FORECAST = fcst_stl_arima_future$mean,
+                          lower_95 = fcst_stl_arima_future$lower,
+                          Upper_95 = fcst_stl_arima_future$upper,
+                          PLOT = plot_stl_arima_baseline,
+                          ACCURACIES = acc_stl_arima_baseline,
+                          CRITERION =  criterion_stl_arima_baseline)
+  
+  
+  
   
   ## auto.arima on the baseline
   arima_baseline_train <- ts_baseline_train %>% forecast::auto.arima() # arima on train set
@@ -199,19 +240,22 @@ predict_baseline <- function(sales_data,
                        series = "Forecasted baseline on testing set", level = FALSE) +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::geom_ribbon(data = ts_baseline_test,
-                         ggplot2::aes(ymin = fcst_arima_baseline$lower, ymax = fcst_arima_baseline$upper),
+                         ggplot2::aes(ymin = fcst_arima_baseline$lower, 
+                                      ymax = fcst_arima_baseline$upper),
                          fill = "blue", alpha = "0.3") +
     ggplot2::geom_ribbon(data = fcst_arima_future$mean,
-                         ggplot2::aes(ymin = fcst_arima_future$lower, ymax = fcst_arima_future$upper),
+                         ggplot2::aes(ymin = fcst_arima_future$lower, 
+                                      ymax = fcst_arima_future$upper),
                          fill = "red", alpha = "0.3") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
-    ggplot2::ggtitle("Actuals, baseline and forecasted baseline using ARIMA") +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using ARIMA using \n ",
+                            fcst_arima_future$method)) +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
     my_theme()
   acc_arima_baseline <- fcst_arima_baseline %>% forecast::accuracy(ts_baseline) # accuracy
   criterion_arima_baseline <- acc_arima_baseline[2, criterion] # MAPE
-  arima_model_baseline <- list(NAME = "Arima model",
+  arima_model_baseline <- list(MODEL = fcst_arima_future$method,
                                TEST_SET = fcst_arima_baseline$mean,
                                FORECAST = fcst_arima_future$mean,
                                lower_95 = fcst_arima_future$lower,
@@ -243,13 +287,14 @@ predict_baseline <- function(sales_data,
                                       ymax = fcst_stlf_baseline_future$upper),
                          fill = "red", alpha = "0.3") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
-    ggplot2::ggtitle("Actuals, baseline and forecasted baseline using stlf") +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using ARIMA using \n ",
+                            fcst_stlf_baseline_future$method)) +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
     my_theme()
   acc_stlf_baseline <- fcst_stlf_baseline %>% forecast::accuracy(ts_baseline) # accuracy
   criterion_stlf_baseline <- acc_stlf_baseline[2, criterion] # MAPE
-  stlf_model_baseline <- list(NAME = "stlf model",
+  stlf_model_baseline <- list(MODEL = fcst_stlf_baseline_future$method,
                               TEST_SET = fcst_stlf_baseline$mean,
                               FORECAST = fcst_stlf_baseline_future$mean,
                               lower_95 = fcst_stlf_baseline_future$lower,
@@ -274,14 +319,15 @@ predict_baseline <- function(sales_data,
                        series = "Forecasted baseline on testing set", level = FALSE) +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
-    ggplot2::ggtitle("Actuals, baseline and forecasted baseline using Neural Network") +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using ARIMA using \n ",
+                            fcst_nnet_baseline_future$method)) +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
     ggplot2::scale_x_continuous(breaks = seq(2014, 2020, 1)) +
     my_theme()
   acc_nnet_baseline <- fcst_nnet_baseline %>% forecast::accuracy(ts_baseline) # accuracy
   criterion_nnet_baseline <- acc_nnet_baseline[2, criterion] # MAPE
-  nnet_model_baseline <- list(NAME = "nnet model",
+  nnet_model_baseline <- list(MODEL = fcst_nnet_baseline_future$method,
                               TEST_SET = fcst_nnet_baseline$mean,
                               FORECAST = fcst_nnet_baseline_future$mean,
                               lower_95 = fcst_nnet_baseline_future$lower,
@@ -352,7 +398,7 @@ predict_baseline <- function(sales_data,
   
   acc_boot_stlf_baseline <- forecast::accuracy(fcst_boot_stlf_baseline$mean, ts_baseline)
   criterion_boot_stlf_baseline <- acc_boot_stlf_baseline[, criterion] # MAPE
-  boot_stlf_model_baseline <- list(NAME = "boot_stlf model",
+  boot_stlf_model_baseline <- list(MODEL = "boot_stlf model",
                                    TEST_SET = fcst_boot_stlf_baseline$mean,
                                    FORECAST = fcst_boot_stlf_future$mean,
                                    lower_95 = fcst_boot_stlf_future$lower,
@@ -424,7 +470,7 @@ predict_baseline <- function(sales_data,
   acc_boot_nnet_baseline <- forecast::accuracy(fcst_boot_nnet_baseline$mean, ts_baseline)
   criterion_boot_nnet_baseline <- acc_boot_nnet_baseline[, criterion] # MAPE
   
-  boot_nnet_model_baseline <- list(NAME = "boot_nnet model",
+  boot_nnet_model_baseline <- list(MODEL = "boot_nnet model",
                                    TEST_SET = fcst_boot_nnet_baseline$mean,
                                    FORECAST = fcst_boot_nnet_future$mean,
                                    lower_95 = fcst_boot_nnet_future$lower,
@@ -439,6 +485,7 @@ predict_baseline <- function(sales_data,
              criterion_boot_nnet_baseline = criterion_boot_nnet_baseline,
              criterion_boot_stlf_baseline = criterion_boot_stlf_baseline,
              criterion_nnet_baseline = criterion_nnet_baseline,
+             criterion_stl_arima_baseline = criterion_stl_arima_baseline,
              criterion_stlf_baseline = criterion_stlf_baseline)
   
   if(names(which.min(criterions)) ==  "criterion_arima_baseline") {
@@ -449,6 +496,8 @@ predict_baseline <- function(sales_data,
     retained_model <- boot_stlf_model_baseline
   } else if(names(which.min(criterions)) ==  "criterion_nnet_baseline") {
     retained_model <- nnet_model_baseline
+  } else if(names(which.min(criterions)) ==  "criterion_stl_arima_baseline") {
+    retained_model <- criterion_stl_arima_baseline
   } else if(names(which.min(criterions)) ==  "criterion_stlf_baseline") {
     retained_model <- stlf_model_baseline
   }
@@ -475,6 +524,7 @@ predict_baseline <- function(sales_data,
 #' @param end A vector of length 2 with the date of the last observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
+#' @param size.te.test A integer value specifying the size of the training set 
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param future_promotions Optionnal: a vector composed on binary variables which are
 #' equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.
@@ -494,6 +544,7 @@ predict_sales <- function(sales_data,
                           start = c(2014, 1),
                           end = c(2019, 12),
                           forecast_horizon = 52,
+                          size.te.test = 52, 
                           promo_done = FALSE,
                           future_promotions = NA,
                           criterion = "MAPE") {
@@ -510,19 +561,60 @@ predict_sales <- function(sales_data,
     
     # the original data, train and test set converted into a time series
     ts_actuals <- stats::ts(
-      sales_data, start = start, end = end, frequency = forecast_horizon)
-    ts_actuals_train <- head(ts_actuals, length(ts_actuals) - forecast_horizon)
+      sales_data, start = start, end = end, frequency = frequency)
+    ts_actuals_train <- head(ts_actuals, length(ts_actuals) - size.te.test)
     ts_actuals_test <- tail(ts_actuals, length(ts_actuals) - length(ts_actuals_train))
     
     
     # Creation of training and testing set (not time series format)
-    size.tr.set <- length(sales_data) - forecast_horizon
-    size.te.set <- forecast_horizon
+    size.tr.set <- length(sales_data) - size.te.test
     tr.set <- sales_data[1:size.tr.set]
     te.set <- sales_data[(size.tr.set + 1):length(sales_data)]
     
+    ## STL + ARIMA
+
+    fcst_stl_arima_actuals <- ts_actuals_train %>%
+      forecast::forecast(method = "arima", h = forecast_horizon, level = 0.95)
+    fcst_stl_arima_future <- ts_actuals %>%
+      forecast::forecast(method = "arima", h = forecast_horizon, level = 0.95)
+
+    plot_stl_arima_actuals <- ggplot2::autoplot(ts_actuals_test) +
+      ggplot2::autolayer(fcst_stl_arima_future, series = "Forecast of future sales", level = FALSE) +
+      ggplot2::autolayer(ts_actuals, series = "Actuals") +
+      ggplot2::autolayer(fcst_stl_arima_actuals, series = "Forecast on testing set", level = FALSE) +
+      ggplot2::geom_ribbon(data = ts_actuals_test,
+                           ggplot2::aes(ymin = fcst_stl_arima_actuals$lower,
+                                        ymax = fcst_stl_arima_actuals$upper),
+                           fill = "blue", alpha = "0.3") +
+      ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
+                           ggplot2::aes(ymin = fcst_stl_arima_future$lower,
+                                        ymax = fcst_stl_arima_future$upper),
+                           fill = "red", alpha = "0.3") +
+      ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
+      ggplot2::ggtitle("Actuals and forecasted total sales using stl_arima") +
+      ggplot2::xlab("Years") +
+      ggplot2::ylab("Sales") +
+      my_theme()
     
-    
+    # plot_stl_arima_actuals <- ggplot2::autoplot(fcst_stl_arima_future) +
+    #   ggplot2::autolayer(fcst_stl_arima_future, series = "Forecast of future sales", level = FALSE) +
+    #   ggplot2::autolayer(ts_actuals, series = "Actuals") +
+    #   ggplot2::autolayer(fcst_stl_arima_actuals, series = "Forecast on testing set", level = FALSE) +
+    #   
+    #   ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
+    #   ggplot2::xlab("Years") +
+    #   ggplot2::ylab("Sales") +
+    #   my_theme()
+    acc_stl_arima_actuals <- fcst_stl_arima_actuals %>% forecast::accuracy(ts_actuals) # accuracy
+    criterion_stl_arima_actuals <- acc_stl_arima_actuals[2, criterion] # MAPE
+    stl_arima_model <- list(MODEL = fcst_stl_arima_future$method,
+                        TEST_SET = fcst_stl_arima_actuals$mean,
+                        FORECAST = fcst_stl_arima_future$mean,
+                        lower_95 = fcst_stl_arima_future$lower,
+                        Upper_95 = fcst_stl_arima_future$upper,
+                        PLOT = plot_stl_arima_actuals,
+                        ACCURACIES = acc_stl_arima_actuals,
+                        CRITERION =  criterion_stl_arima_actuals)
     
     
     ## auto.arima on historic data
@@ -550,7 +642,7 @@ predict_sales <- function(sales_data,
       my_theme()
     acc_arima_actuals <- fcst_arima_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     criterion_arima_actuals <- acc_arima_actuals[2, criterion] # MAPE
-    arima_model <- list(NAME = "Arima model",
+    arima_model <- list(MODEL = fcst_arima_future$method,
                         TEST_SET = fcst_arima_actuals$mean,
                         FORECAST = fcst_arima_future$mean,
                         lower_95 = fcst_arima_future$lower,
@@ -584,7 +676,7 @@ predict_sales <- function(sales_data,
       my_theme()
     acc_stlf_actuals <- fcst_stlf_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     criterion_stlf_actuals <- acc_stlf_actuals[2, criterion] 
-    stlf_model <- list(NAME = "stlf model",
+    stlf_model <- list(MODEL = fcst_stlf_future$method,
                        TEST_SET = fcst_stlf_actuals$mean,
                        FORECAST = fcst_stlf_future$mean,
                        lower_95 = fcst_stlf_future$lower,
@@ -611,7 +703,7 @@ predict_sales <- function(sales_data,
       my_theme()
     acc_nnet_actuals <- fcst_nnet_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     criterion_nnet_actuals <- acc_nnet_actuals[2, criterion] 
-    nnet_model <- list(NAME = "nnet model",
+    nnet_model <- list(MODEL = fcst_nnet_future$method,
                        TEST_SET = fcst_nnet_actuals$mean,
                        FORECAST = fcst_nnet_future$mean,
                        lower_95 = fcst_nnet_future$lower,
@@ -662,7 +754,6 @@ predict_sales <- function(sales_data,
     )
     
     
-    
     plot_boot_stlf_actuals <- ggplot2::autoplot(ts_actuals_test) +
       ggplot2::autolayer(fcst_boot_stlf_future$mean,
                          series = "Forecast of future sales") +
@@ -684,7 +775,7 @@ predict_sales <- function(sales_data,
     criterion_boot_stlf_actuals <- acc_boot_stlf_actuals[, criterion] 
     
     
-    boot_stlf_model <- list(NAME = "boot_stlf model",
+    boot_stlf_model <- list(MODEL = "boot_stlf model",
                             TEST_SET = fcst_boot_stlf_actuals$mean,
                             FORECAST = fcst_boot_stlf_future$mean,
                             lower_95 = fcst_boot_stlf_future$lower,
@@ -755,7 +846,7 @@ predict_sales <- function(sales_data,
     criterion_boot_nnet_actuals <- acc_boot_nnet_actuals[, criterion] 
     
     
-    boot_nnet_model <- list(NAME = "boot_nnet model",
+    boot_nnet_model <- list(MODEL = "boot_nnet model",
                             TEST_SET = fcst_boot_nnet_actuals$mean,
                             FORECAST = fcst_boot_nnet_future$mean,
                             lower_95 = fcst_boot_nnet_future$lower,
@@ -806,7 +897,7 @@ predict_sales <- function(sales_data,
       criterion_dyna_actuals <- 10^8
     }
     
-    dyna_model <- list(NAME = "Dynamic model",
+    dyna_model <- list(MODEL = "Dynamic model",
                        FORECAST = fcst_dyna_actuals$mean,
                        lower_95 = fcst_dyna_actuals$lower,
                        Upper_95 = fcst_dyna_actuals$upper,
@@ -816,6 +907,7 @@ predict_sales <- function(sales_data,
     
     # performance of each model
     criterions <- c(criterion_arima_actuals = criterion_arima_actuals,
+                    criterion_stl_arima_actuals = criterion_stl_arima_actuals, 
                criterion_boot_nnet_actuals = criterion_boot_nnet_actuals,
                criterion_boot_stlf_actuals = criterion_boot_stlf_actuals,
                criterion_dyna_actuals = criterion_dyna_actuals,
@@ -826,6 +918,8 @@ predict_sales <- function(sales_data,
       retained_model <- arima_model
     } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_actuals") {
       retained_model <- boot_nnet_model
+    } else if(names(which.min(criterions)) ==  "criterion_stl_arima_actuals") {
+      retained_model <- stl_arima_model
     } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_actuals") {
       retained_model <- boot_stlf_model
     } else if(names(which.min(criterions)) ==  "criterion_dyna_actuals") {
@@ -843,6 +937,7 @@ predict_sales <- function(sales_data,
                                   bootstrapped_stlf= boot_stlf_model,
                                   dynamic_model = dyna_model,
                                   neural_network = nnet_model,
+                                  stl_arima_model = stl_arima_model,
                                   stlf_model = stlf_model)))
   
   }
@@ -879,7 +974,7 @@ my_theme <- function(base_size = 10, base_family = "sans") {
       panel.background = ggplot2::element_rect(fill = "aliceblue"),
       strip.background = ggplot2::element_rect(
         color = "grey", size = 1, fill = "lightgrey"),
-      strip.text = ggplot2::element_text(color = "black", size = 10, face = "bold"),
+      strip.text = ggplot2::element_text(color = "black", size = 8, face = "bold"),
       legend.position = "bottom",
       legend.justification = "top",
       legend.box = "horizontal",
