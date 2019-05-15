@@ -5,7 +5,7 @@
 \title{Creates sales forecast based on historical data}
 \usage{
 predict_sales(sales_data, frequency = 52, start = c(2014, 1),
-  end = c(2019, 12), forecast_horizon = 52, size.te.test = 52,
+  end = c(2019, 12), forecast_horizon = 52, size.te.set = 52,
   promo_done = FALSE, future_promotions = NA, criterion = "MAPE")
 }
 \arguments{
@@ -21,7 +21,7 @@ It contains first the year and then the day/week/month according to your data.}
 
 \item{forecast_horizon}{An integer value specifying the number of observations to forecast.}
 
-\item{size.te.test}{A integer value specifying the size of the training set}
+\item{size.te.set}{A integer value specifying the size of the training set}
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
