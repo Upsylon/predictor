@@ -146,7 +146,8 @@ baseline <- function(sales_data,
 #' @param size.te.set A integer value specifying the size of the training set 
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param criterion A string variable specifying the selection criterion that should be used to
-#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").
+#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+#' can also be used to reflect the needs of the company
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervals, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -582,7 +583,8 @@ predict_baseline <- function(sales_data,
 #' @param future_promotions Optionnal: a vector composed on binary variables which are
 #' equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.
 #' @param criterion A string variable specifying the selection criterion that should be used to
-#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").
+#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+#' can also be used to reflect the needs of the company.
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervales, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -1070,9 +1072,9 @@ predict_sales <- function(sales_data,
 my_theme <- function(base_size = 10, base_family = "sans") {
   ggplot2::theme_minimal(base_size = base_size, base_family = base_family) +
     ggplot2::theme(
-      axis.text = ggplot2::element_text(size = 11),
+      axis.text = ggplot2::element_text(size = 8),
       axis.text.x = ggplot2::element_text(vjust = 0.5, hjust = 0.5),
-      axis.title = ggplot2::element_text(size = 14),
+      axis.title = ggplot2::element_text(size = 11),
       plot.title = ggplot2::element_text(hjust = 0.5),
       panel.grid.major = ggplot2::element_line(color = "grey"),
       panel.grid.minor = ggplot2::element_blank(),
