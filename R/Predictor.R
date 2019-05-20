@@ -1074,7 +1074,7 @@ my_theme <- function(base_size = 10, base_family = "sans") {
     ggplot2::theme(
       axis.text = ggplot2::element_text(size = 8),
       axis.text.x = ggplot2::element_text(vjust = 0.5, hjust = 0.5),
-      axis.title = ggplot2::element_text(size = 11),
+      axis.title = ggplot2::element_text(size = 8),
       plot.title = ggplot2::element_text(hjust = 0.5),
       panel.grid.major = ggplot2::element_line(color = "grey"),
       panel.grid.minor = ggplot2::element_blank(),
