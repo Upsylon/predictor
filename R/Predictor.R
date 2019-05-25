@@ -49,10 +49,14 @@ baseline <- function(sales_data,
     
     myres_baseline <- mydata_baseline - rollmed_baseline
     
-    mix_baseline <-
+    invisible(
+      capture.output(
+      mix_baseline <-
       mixtools::normalmixEM(myres_baseline[index_baseline[, 1], 1],
                             maxit = 10 ^ 8,
                             maxrestarts = 10 ^ 4)
+      )
+    )
     
     promo <- matrix(nrow = nrow(sales_data), ncol = ncol(sales_data))
     
@@ -355,7 +359,7 @@ predict_baseline <- function(sales_data,
                                   forecast_horizon/frequency)) +
     my_theme()
   acc_nnet_baseline <- fcst_nnet_baseline %>% forecast::accuracy(ts_baseline) # accuracy
-  accuracy <- percent_accuracy(fcst_stlf_baseline$mean, te.set.baseline)
+  accuracy <- percent_accuracy(fcst_nnet_baseline$mean, te.set.baseline)
   acc_nnet_baseline <- cbind(acc_nnet_baseline, accuracy) 
   criterion_nnet_baseline <- acc_nnet_baseline[2, criterion] # MAPE
   nnet_model_baseline <- list(MODEL = fcst_nnet_baseline_future$method,
@@ -414,10 +418,10 @@ predict_baseline <- function(sales_data,
   
   plot_boot_stlf_baseline <- ggplot2::autoplot(ts_baseline_test) +
     ggplot2::autolayer(fcst_boot_stlf_future$mean,
-                       series = "Forecast of future sales") +
-    ggplot2::autolayer(ts_baseline, series = "baseline") +
+                       series = "Forecasted future baseline") +
+    ggplot2::autolayer(ts_baseline, series = "Baseline") +
     ggplot2::autolayer(fcst_boot_stlf_baseline$mean,
-                       series = "Forecast on testing set") +
+                       series = "Forecasted baseline on testing set") +
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_boot_stlf_baseline$lower, 
                                       ymax = fcst_boot_stlf_baseline$upper),
@@ -496,10 +500,10 @@ predict_baseline <- function(sales_data,
   
   plot_boot_nnet_baseline <- ggplot2::autoplot(ts_baseline_test) +
     ggplot2::autolayer(fcst_boot_nnet_future$mean,
-                       series = "Forecast of future sales") +
-    ggplot2::autolayer(ts_baseline, series = "baseline") +
+                       series = "Forecasted future baseline") +
+    ggplot2::autolayer(ts_baseline, series = "Baseline") +
     ggplot2::autolayer(fcst_boot_nnet_baseline$mean,
-                       series = "Forecast on testing set") +
+                       series = "Forecasted baseline on testing set") +
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_boot_nnet_baseline$lower, 
                                       ymax = fcst_boot_nnet_baseline$upper),
@@ -532,38 +536,123 @@ predict_baseline <- function(sales_data,
                                    ACCURACIES = acc_boot_nnet_baseline,
                                    CRITERION =  criterion_boot_nnet_baseline)
   
+  combined_baseline <- (fcst_arima_baseline$mean + fcst_stlf_baseline$mean +
+                         fcst_nnet_baseline$mean + fcst_stl_arima_baseline$mean +
+                         fcst_boot_nnet_baseline$mean + fcst_boot_stlf_baseline$mean)/6
+  upper_baseline <- (fcst_arima_baseline$upper + fcst_stlf_baseline$upper +
+                      fcst_stl_arima_baseline$upper +
+                      fcst_boot_nnet_baseline$upper + fcst_boot_stlf_baseline$upper)/5
+  lower_baseline <- (fcst_arima_baseline$lower + fcst_stlf_baseline$lower +
+                      fcst_stl_arima_baseline$lower +
+                      fcst_boot_nnet_baseline$lower + fcst_boot_stlf_baseline$lower)/5
+  combined_future <- (fcst_arima_future$mean + fcst_stlf_baseline_future$mean +
+                        fcst_nnet_baseline_future$mean + fcst_stl_arima_future$mean +
+                        fcst_boot_nnet_future$mean + fcst_boot_stlf_future$mean)/6
+  upper_future <- (fcst_arima_future$upper + fcst_stlf_baseline_future$upper +
+                     fcst_stl_arima_future$upper +
+                     fcst_boot_nnet_future$upper + fcst_boot_stlf_future$upper)/5
+  lower_future <- (fcst_arima_future$lower + fcst_stlf_baseline_future$lower +
+                     fcst_stl_arima_future$lower +
+                     fcst_boot_nnet_future$lower + fcst_boot_stlf_future$lower)/5
   
   
+  plot_combined_baseline <- ggplot2::autoplot(ts_baseline_test) +
+    ggplot2::autolayer(combined_future, 
+                       series = "Forecasted future baseline") +
+    ggplot2::autolayer(ts_baseline, series = "Baseline") +
+    ggplot2::autolayer(combined_baseline, 
+                       series = "Forecasted baseline on testing set") +
+    ggplot2::geom_ribbon(data = ts_baseline_test,
+                         ggplot2::aes(ymin = lower_baseline, 
+                                      ymax = upper_baseline),
+                         fill = "blue", alpha = "0.3") +
+    ggplot2::geom_ribbon(data = combined_future,
+                         ggplot2::aes(ymin = lower_future, 
+                                      ymax = upper_future),
+                         fill = "red", alpha = "0.3") +
+    ggplot2::autolayer(ts_actuals, series = "Actuals") +
+    ggplot2::scale_color_manual(values = c("black", "grey", "red", "blue")) +
+    ggplot2::ggtitle("Average forecast of all combined models") +
+    ggplot2::xlab("Years") +
+    ggplot2::ylab("Sales") +
+    ggplot2::scale_x_continuous(breaks = 
+                                  seq(start(ts_baseline)[[1]], end(ts_baseline)[[1]] + 
+                                        forecast_horizon/frequency)) +
+    my_theme()
+  acc_combined <- combined_baseline %>% forecast::accuracy(ts_baseline) # accuracy
+  accuracy <- percent_accuracy(combined_baseline, te.set)
+  acc_combined <- cbind(acc_combined, accuracy) 
+  criterion_combined <- acc_combined[, criterion] # MAPE
+  combined_model <- list(MODEL = "Combined model",
+                         TEST_SET = combined_baseline,
+                         FORECAST = combined_future,
+                         lower_95 = lower_future,
+                         Upper_95 = upper_future,
+                         PLOT = plot_combined_baseline,
+                         ACCURACIES = acc_combined,
+                         CRITERION =  criterion_combined)
+  
+  # performance of each model
   criterions <- c(criterion_arima_baseline = criterion_arima_baseline,
-             criterion_boot_nnet_baseline = criterion_boot_nnet_baseline,
-             criterion_boot_stlf_baseline = criterion_boot_stlf_baseline,
-             criterion_nnet_baseline = criterion_nnet_baseline,
-             criterion_stl_arima_baseline = criterion_stl_arima_baseline,
-             criterion_stlf_baseline = criterion_stlf_baseline)
+                  criterion_stl_arima_baseline = criterion_stl_arima_baseline, 
+                  criterion_boot_nnet_baseline = criterion_boot_nnet_baseline,
+                  criterion_boot_stlf_baseline = criterion_boot_stlf_baseline,
+                  criterion_nnet_baseline = criterion_nnet_baseline,
+                  criterion_stlf_baseline = criterion_stlf_baseline,
+                  criterion_combined = criterion_combined)
   
-  if(names(which.min(criterions)) ==  "criterion_arima_baseline") {
-    retained_model <- arima_model_baseline
-  } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_baseline") {
-    retained_model <- boot_nnet_model_baseline
-  } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_baseline") {
-    retained_model <- boot_stlf_model_baseline
-  } else if(names(which.min(criterions)) ==  "criterion_nnet_baseline") {
-    retained_model <- nnet_model_baseline
-  } else if(names(which.min(criterions)) ==  "criterion_stl_arima_baseline") {
-    retained_model <- criterion_stl_arima_baseline
-  } else if(names(which.min(criterions)) ==  "criterion_stlf_baseline") {
-    retained_model <- stlf_model_baseline
+  if (criterion == "ME" | 
+      criterion == "RMSE" | 
+      criterion == "MAE" | 
+      criterion == "MPE" | 
+      criterion == "MAPE" |
+      criterion == "MASE" |
+      criterion == "ACF1") {
+    
+    if(names(which.min(criterions)) ==  "criterion_arima_baseline") {
+      retained_model <- arima_model_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_baseline") {
+      retained_model <- boot_nnet_model_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_combined") {
+      retained_model <- combined_model
+    } else if(names(which.min(criterions)) ==  "criterion_stl_arima_baseline") {
+      retained_model <- stl_arima_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_baseline") {
+      retained_model <- boot_stlf_model_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_nnet_baseline") {
+      retained_model <- nnet_model_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_stlf_baseline") {
+      retained_model <- stlf_model_baseline
+    }
+  } else if (criterion == "Theil's U" | 
+             criterion == "accuracy") {
+    if(names(which.max(criterions)) ==  "criterion_arima_baseline") {
+      retained_model <- arima_model_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_boot_nnet_baseline") {
+      retained_model <- boot_nnet_model_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_combined") {
+      retained_model <- combined_model
+    } else if(names(which.max(criterions)) ==  "criterion_stl_arima_baseline") {
+      retained_model <- stl_arima_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_boot_stlf_baseline") {
+      retained_model <- boot_stlf_model_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_nnet_baseline") {
+      retained_model <- nnet_model_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_stlf_baseline") {
+      retained_model <- stlf_model_baseline
+    }
   }
   
   
   return(list(selected_model = retained_model,
-              all_models = list(arima_baseline = arima_model_baseline,
+              all_models = list(arima_model_baseline = arima_model_baseline,
                                 bootstrapped_nnet_baseline = boot_nnet_model_baseline,
                                 bootstrapped_stlf_baseline = boot_stlf_model_baseline,
+                                combined_model_baseline = combined_model,
                                 neural_network_baseline = nnet_model_baseline,
-                                stl_arima_baseline = stl_arima_baseline,
-                                stlf_baseline =   stlf_model_baseline)))
-  
+                                stl_arima_model_baseline = stl_arima_baseline,
+                                stlf_model_baseline = stlf_model_baseline)))
+
 }
 
 
@@ -955,6 +1044,63 @@ predict_sales <- function(sales_data,
                             ACCURACIES = acc_boot_nnet_actuals,
                             CRITERION =  criterion_boot_nnet_actuals)
     
+    
+    
+    
+    combined_actuals <- (fcst_arima_actuals$mean + fcst_stlf_actuals$mean +
+                           fcst_nnet_actuals$mean + fcst_stl_arima_actuals$mean +
+                           fcst_boot_nnet_actuals$mean + fcst_boot_stlf_actuals$mean)/6
+    upper_actuals <- (fcst_arima_actuals$upper + fcst_stlf_actuals$upper +
+                        fcst_stl_arima_actuals$upper +
+                        fcst_boot_nnet_actuals$upper + fcst_boot_stlf_actuals$upper)/6
+    lower_actuals <- (fcst_arima_actuals$lower + fcst_stlf_actuals$lower +
+                       fcst_stl_arima_actuals$lower +
+                        fcst_boot_nnet_actuals$lower + fcst_boot_stlf_actuals$lower)/6
+    combined_future <- (fcst_arima_future$mean + fcst_stlf_future$mean +
+                          fcst_nnet_future$mean + fcst_stl_arima_future$mean +
+                          fcst_boot_nnet_future$mean + fcst_boot_stlf_future$mean)/6
+    upper_future <- (fcst_arima_future$upper + fcst_stlf_future$upper +
+                           fcst_stl_arima_future$upper +
+                          fcst_boot_nnet_future$upper + fcst_boot_stlf_future$upper)/6
+    lower_future <- (fcst_arima_future$lower + fcst_stlf_future$lower +
+                       fcst_stl_arima_future$lower +
+                       fcst_boot_nnet_future$lower + fcst_boot_stlf_future$lower)/6
+    
+    
+    plot_combined_actuals <- ggplot2::autoplot(ts_actuals_test) +
+      ggplot2::autolayer(combined_future, series = "Forecast of future sales") +
+      ggplot2::autolayer(ts_actuals, series = "Actuals") +
+      ggplot2::autolayer(combined_actuals, series = "Forecast on testing set") +
+      ggplot2::geom_ribbon(data = ts_actuals_test,
+                           ggplot2::aes(ymin = lower_actuals, 
+                                        ymax = upper_actuals),
+                           fill = "blue", alpha = "0.3") +
+      ggplot2::geom_ribbon(data = combined_future,
+                           ggplot2::aes(ymin = lower_future, 
+                                        ymax = upper_future),
+                           fill = "red", alpha = "0.3") +
+      ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
+      ggplot2::ggtitle("Average forecast of all combined models") +
+      ggplot2::xlab("Years") +
+      ggplot2::ylab("Sales") +
+      ggplot2::scale_x_continuous(breaks = 
+                                    seq(start(ts_actuals)[[1]], end(ts_actuals)[[1]] + 
+                                          forecast_horizon/frequency)) +
+      my_theme()
+    acc_combined <- combined_actuals %>% forecast::accuracy(ts_actuals) # accuracy
+    accuracy <- percent_accuracy(combined_actuals, te.set)
+    acc_combined <- cbind(acc_combined, accuracy) 
+    criterion_combined <- acc_combined[, criterion] # MAPE
+    combined_model <- list(MODEL = "Combined model",
+                        TEST_SET = combined_actuals,
+                        FORECAST = combined_future,
+                        lower_95 = lower_future,
+                        Upper_95 = upper_future,
+                        PLOT = plot_combined_actuals,
+                        ACCURACIES = acc_combined,
+                        CRITERION =  criterion_combined)
+      
+    
     if(promo_done == TRUE) {
       promos <- baseline(
         sales_data, promo_done = TRUE, sizeroll = sizeroll, smoother = smoother)$promotions %>% 
@@ -1001,7 +1147,7 @@ predict_sales <- function(sales_data,
       fcst_dyna_actuals <- NULL
       plot_dyna_actuals <- NULL
       acc_dyna_actuals <- NULL
-      criterion_dyna_actuals <- 10^8
+      criterion_dyna_actuals <- NULL
     }
     
     dyna_model <- list(MODEL = "Dynamic model",
@@ -1019,12 +1165,23 @@ predict_sales <- function(sales_data,
                criterion_boot_stlf_actuals = criterion_boot_stlf_actuals,
                criterion_dyna_actuals = criterion_dyna_actuals,
                criterion_nnet_actuals = criterion_nnet_actuals,
-               criterion_stlf_actuals = criterion_stlf_actuals)
+               criterion_stlf_actuals = criterion_stlf_actuals,
+               criterion_combined = criterion_combined)
+    
+    if (criterion == "ME" | 
+        criterion == "RMSE" | 
+        criterion == "MAE" | 
+        criterion == "MPE" | 
+        criterion == "MAPE" |
+        criterion == "MASE" |
+        criterion == "ACF1") {
     
     if(names(which.min(criterions)) ==  "criterion_arima_actuals") {
       retained_model <- arima_model
     } else if(names(which.min(criterions)) ==  "criterion_boot_nnet_actuals") {
       retained_model <- boot_nnet_model
+    } else if(names(which.min(criterions)) ==  "criterion_combined") {
+      retained_model <- combined_model
     } else if(names(which.min(criterions)) ==  "criterion_stl_arima_actuals") {
       retained_model <- stl_arima_model
     } else if(names(which.min(criterions)) ==  "criterion_boot_stlf_actuals") {
@@ -1036,12 +1193,32 @@ predict_sales <- function(sales_data,
     } else if(names(which.min(criterions)) ==  "criterion_stlf_actuals") {
       retained_model <- stlf_model
     }
-    
+    } else if (criterion == "Theil's U" | 
+               criterion == "accuracy") {
+      if(names(which.max(criterions)) ==  "criterion_arima_actuals") {
+        retained_model <- arima_model
+      } else if(names(which.max(criterions)) ==  "criterion_boot_nnet_actuals") {
+        retained_model <- boot_nnet_model
+      } else if(names(which.max(criterions)) ==  "criterion_combined") {
+        retained_model <- combined_model
+      } else if(names(which.max(criterions)) ==  "criterion_stl_arima_actuals") {
+        retained_model <- stl_arima_model
+      } else if(names(which.max(criterions)) ==  "criterion_boot_stlf_actuals") {
+        retained_model <- boot_stlf_model
+      } else if(names(which.max(criterions)) ==  "criterion_dyna_actuals") {
+        retained_model <- dyna_model
+      } else if(names(which.max(criterions)) ==  "criterion_nnet_actuals") {
+        retained_model <- nnet_model
+      } else if(names(which.max(criterions)) ==  "criterion_stlf_actuals") {
+        retained_model <- stlf_model
+      }
+    }
 
     return(list(selected_model = retained_model,
                 all_models = list(arima = arima_model,
                                   bootstrapped_nnet = boot_nnet_model,
                                   bootstrapped_stlf= boot_stlf_model,
+                                  combined_model = combined_model,
                                   dynamic_model = dyna_model,
                                   neural_network = nnet_model,
                                   stl_arima_model = stl_arima_model,
