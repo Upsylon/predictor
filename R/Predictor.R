@@ -431,7 +431,7 @@ predict_baseline <- function(sales_data,
                                       ymax = fcst_boot_stlf_future$upper),
                          fill = "red", alpha = "0.3") +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
-    ggplot2::scale_color_manual(values = c("black", "grey", "red", "blue")) +
+    ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and STLF") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
@@ -513,7 +513,7 @@ predict_baseline <- function(sales_data,
                                       ymax = fcst_boot_nnet_future$upper),
                          fill = "red", alpha = "0.3") +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
-    ggplot2::scale_color_manual(values = c("black", "grey", "red", "blue")) +
+    ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and nnet") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
@@ -571,7 +571,7 @@ predict_baseline <- function(sales_data,
                                       ymax = upper_future),
                          fill = "red", alpha = "0.3") +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
-    ggplot2::scale_color_manual(values = c("black", "grey", "red", "blue")) +
+    ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Average forecast of all combined models") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
@@ -691,7 +691,7 @@ predict_sales <- function(sales_data,
                           size.te.set = 52, 
                           promo_done = FALSE,
                           future_promotions = NA,
-                          criterion = "MAPE") {
+                          criterion = "accuracy") {
   
   if (length(future_promotions) != forecast_horizon && !is.na(future_promotions)) {
     warning("future_promotions should be the same length as the forecasting horizon")
@@ -756,12 +756,16 @@ predict_sales <- function(sales_data,
     acc_stl_arima_actuals <- fcst_stl_arima_actuals %>% forecast::accuracy(ts_actuals)
     accuracy <- percent_accuracy(fcst_stl_arima_actuals$mean, te.set)
     acc_stl_arima_actuals <- cbind(acc_stl_arima_actuals, accuracy) 
-    criterion_stl_arima_actuals <- acc_stl_arima_actuals[2, criterion] # MAPE
+    criterion_stl_arima_actuals <- acc_stl_arima_actuals[2, criterion]
+    actual_forecast <- ts(c(ts_actuals, fcst_stl_arima_future$mean), 
+                          start = start,
+                          frequency = frequency)
     stl_arima_model <- list(MODEL = fcst_stl_arima_future$method,
                         TEST_SET = fcst_stl_arima_actuals$mean,
                         FORECAST = fcst_stl_arima_future$mean,
                         lower_95 = fcst_stl_arima_future$lower,
                         Upper_95 = fcst_stl_arima_future$upper,
+                        ACTUAL_FORECAST = actual_forecast, 
                         PLOT = plot_stl_arima_actuals,
                         ACCURACIES = acc_stl_arima_actuals,
                         CRITERION =  criterion_stl_arima_actuals)
@@ -797,12 +801,16 @@ predict_sales <- function(sales_data,
     acc_arima_actuals <- fcst_arima_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     accuracy <- percent_accuracy(fcst_arima_actuals$mean, te.set)
     acc_arima_actuals <- cbind(acc_arima_actuals, accuracy) 
-    criterion_arima_actuals <- acc_arima_actuals[2, criterion] # MAPE
+    criterion_arima_actuals <- acc_arima_actuals[2, criterion] 
+    actual_forecast <- ts(c(ts_actuals, fcst_arima_future$mean), 
+                          start = start,
+                          frequency = frequency)
     arima_model <- list(MODEL = fcst_arima_future$method,
                         TEST_SET = fcst_arima_actuals$mean,
                         FORECAST = fcst_arima_future$mean,
                         lower_95 = fcst_arima_future$lower,
                         Upper_95 = fcst_arima_future$upper,
+                        FORECAST_ACTUALS = actual_forecast, 
                         PLOT = plot_arima_actuals,
                         ACCURACIES = acc_arima_actuals,
                         CRITERION =  criterion_arima_actuals)
@@ -838,11 +846,15 @@ predict_sales <- function(sales_data,
     accuracy <- percent_accuracy(fcst_stlf_actuals$mean, te.set)
     acc_stlf_actuals <- cbind(acc_stlf_actuals, accuracy) 
     criterion_stlf_actuals <- acc_stlf_actuals[2, criterion] 
+    actual_forecast <- ts(c(ts_actuals, fcst_stlf_future$mean), 
+                          start = start,
+                          frequency = frequency)
     stlf_model <- list(MODEL = fcst_stlf_future$method,
                        TEST_SET = fcst_stlf_actuals$mean,
                        FORECAST = fcst_stlf_future$mean,
                        lower_95 = fcst_stlf_future$lower,
                        Upper_95 = fcst_stlf_future$upper,
+                       FORECAST_ACTUALS = actual_forecast, 
                        PLOT = plot_stlf_actuals,
                        ACCURACIES = acc_stlf_actuals,
                        CRITERION =  criterion_stlf_actuals)
@@ -871,11 +883,15 @@ predict_sales <- function(sales_data,
     accuracy <- percent_accuracy(fcst_nnet_actuals$mean, te.set)
     acc_nnet_actuals <- cbind(acc_nnet_actuals, accuracy) 
     criterion_nnet_actuals <- acc_nnet_actuals[2, criterion] 
+    actual_forecast <- ts(c(ts_actuals, fcst_nnet_future$mean), 
+                          start = start,
+                          frequency = frequency)
     nnet_model <- list(MODEL = fcst_nnet_future$method,
                        TEST_SET = fcst_nnet_actuals$mean,
                        FORECAST = fcst_nnet_future$mean,
                        lower_95 = fcst_nnet_future$lower,
                        Upper_95 = fcst_nnet_future$upper,
+                       FORECAST_ACTUALS = actual_forecast, 
                        PLOT = plot_nnet_actuals,
                        ACCURACIES = acc_nnet_actuals,
                        CRITERION =  criterion_nnet_actuals)
@@ -951,13 +967,16 @@ predict_sales <- function(sales_data,
     accuracy <- percent_accuracy(fcst_boot_stlf_actuals$mean, te.set)
     acc_boot_stlf_actuals <- cbind(acc_boot_stlf_actuals, accuracy) 
     criterion_boot_stlf_actuals <- acc_boot_stlf_actuals[, criterion] 
-    
+    actual_forecast <- ts(c(ts_actuals, fcst_boot_stlf_future$mean), 
+                          start = start,
+                          frequency = frequency)
     
     boot_stlf_model <- list(MODEL = "boot_stlf model",
                             TEST_SET = fcst_boot_stlf_actuals$mean,
                             FORECAST = fcst_boot_stlf_future$mean,
                             lower_95 = fcst_boot_stlf_future$lower,
                             Upper_95 = fcst_boot_stlf_future$upper,
+                            FORECAST_ACTUALS = actual_forecast, 
                             PLOT = plot_boot_stlf_actuals,
                             ACCURACIES = acc_boot_stlf_actuals,
                             CRITERION =  criterion_boot_stlf_actuals)
@@ -1033,13 +1052,16 @@ predict_sales <- function(sales_data,
     accuracy <- percent_accuracy(fcst_boot_nnet_actuals$mean, te.set)
     acc_boot_nnet_actuals <- cbind(acc_boot_nnet_actuals, accuracy) 
     criterion_boot_nnet_actuals <- acc_boot_nnet_actuals[, criterion] 
-    
+    actual_forecast <- ts(c(ts_actuals, fcst_boot_nnet_future$mean), 
+                          start = start,
+                          frequency = frequency)
     
     boot_nnet_model <- list(MODEL = "boot_nnet model",
                             TEST_SET = fcst_boot_nnet_actuals$mean,
                             FORECAST = fcst_boot_nnet_future$mean,
                             lower_95 = fcst_boot_nnet_future$lower,
                             Upper_95 = fcst_boot_nnet_future$upper,
+                            FORECAST_ACTUALS = actual_forecast, 
                             PLOT = plot_boot_nnet_actuals,
                             ACCURACIES = acc_boot_nnet_actuals,
                             CRITERION =  criterion_boot_nnet_actuals)
@@ -1090,12 +1112,16 @@ predict_sales <- function(sales_data,
     acc_combined <- combined_actuals %>% forecast::accuracy(ts_actuals) # accuracy
     accuracy <- percent_accuracy(combined_actuals, te.set)
     acc_combined <- cbind(acc_combined, accuracy) 
-    criterion_combined <- acc_combined[, criterion] # MAPE
+    criterion_combined <- acc_combined[, criterion]
+    actual_forecast <- ts(c(ts_actuals, combined_future), 
+                          start = start,
+                          frequency = frequency)
     combined_model <- list(MODEL = "Combined model",
                         TEST_SET = combined_actuals,
                         FORECAST = combined_future,
                         lower_95 = lower_future,
                         Upper_95 = upper_future,
+                        FORECAST_ACTUALS = actual_forecast, 
                         PLOT = plot_combined_actuals,
                         ACCURACIES = acc_combined,
                         CRITERION =  criterion_combined)
@@ -1141,6 +1167,9 @@ predict_sales <- function(sales_data,
       accuracy <- percent_accuracy(fcst_dyna_actuals$mean, te.set)
       acc_dyna_actuals <- cbind(acc_dyna_actuals, accuracy) 
       criterion_dyna_actuals <- acc_dyna_actuals[2, criterion] 
+      actual_forecast <- ts(c(ts_actuals, fcst_dyna_future), 
+                            start = start,
+                            frequency = frequency)
       
     } else {
       dyna_actuals_train <- NULL
@@ -1154,6 +1183,7 @@ predict_sales <- function(sales_data,
                        FORECAST = fcst_dyna_actuals$mean,
                        lower_95 = fcst_dyna_actuals$lower,
                        Upper_95 = fcst_dyna_actuals$upper,
+                       FORECAST_ACTUALS = actual_forecast, 
                        PLOT = plot_dyna_actuals,
                        ACCURACIES = acc_dyna_actuals,
                        CRITERION =  criterion_dyna_actuals)
@@ -1214,24 +1244,23 @@ predict_sales <- function(sales_data,
       }
     }
 
-    return(list(selected_model = retained_model,
-                all_models = list(arima = arima_model,
-                                  bootstrapped_nnet = boot_nnet_model,
-                                  bootstrapped_stlf= boot_stlf_model,
-                                  combined_model = combined_model,
-                                  dynamic_model = dyna_model,
-                                  neural_network = nnet_model,
-                                  stl_arima_model = stl_arima_model,
-                                  stlf_model = stlf_model)))
+    return(list(
+      selected_model = retained_model,
+      all_models = list(
+        arima = arima_model,
+        bootstrapped_nnet = boot_nnet_model,
+        bootstrapped_stlf = boot_stlf_model,
+        combined_model = combined_model,
+        dynamic_model = dyna_model,
+        neural_network = nnet_model,
+        stl_arima_model = stl_arima_model,
+        stlf_model = stlf_model
+      )
+    ))
   
   }
 }
 
-
-# finalMatrix <- foreach(i=1:115, .combine = cbind) %dopar% {
-#   tempMatrix = predict_sales(mydata[,i+3]) #calling a function
-#   tempMatrix #Equivalent to finalMatrix = cbind(finalMatrix, tempMatrix)
-# }
 
 
 
@@ -1249,9 +1278,9 @@ predict_sales <- function(sales_data,
 my_theme <- function(base_size = 10, base_family = "sans") {
   ggplot2::theme_minimal(base_size = base_size, base_family = base_family) +
     ggplot2::theme(
-      axis.text = ggplot2::element_text(size = 8),
+      axis.text = ggplot2::element_text(size = 10),
       axis.text.x = ggplot2::element_text(vjust = 0.5, hjust = 0.5),
-      axis.title = ggplot2::element_text(size = 8),
+      axis.title = ggplot2::element_text(size = 10),
       plot.title = ggplot2::element_text(hjust = 0.5),
       panel.grid.major = ggplot2::element_line(color = "grey"),
       panel.grid.minor = ggplot2::element_blank(),
