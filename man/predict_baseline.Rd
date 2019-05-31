@@ -10,9 +10,9 @@ predict_baseline(sales_data, frequency = 52, start = c(2014, 1),
   smoother = "mean")
 }
 \arguments{
-\item{sales_data}{A vector containing historical sales data}
+\item{sales_data}{A vector containing historical sales data.}
 
-\item{frequency}{A numerical value specifying the frequency of the seasonality}
+\item{frequency}{A numerical value specifying the frequency of the seasonality.}
 
 \item{start}{A vector of length 2 with the date of the first observation.
 It contains first the year and then the day/week/month according to your data.}
@@ -27,7 +27,14 @@ It contains first the year and then the day/week/month according to your data.}
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
 \item{criterion}{A string variable specifying the selection criterion that should be used to
-select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").}
+select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+can also be used to reflect the needs of the company.}
+
+\item{sizeroll}{The window of the moving average or moving median when using 
+the baseline () function.}
+
+\item{smoother}{The smoother that should be considered when using the baseline () function. 
+It can be "mean", "median" or "loess".}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the

@@ -140,8 +140,8 @@ baseline <- function(sales_data,
 #' @description This function enables to create the baseline sales forecast based on historical
 #' sales data. It generates an historical baseline, considers a multitude of models
 #' and selects the model that had the best performance on the testing set.
-#' @param sales_data A vector containing historical sales data
-#' @param frequency A numerical value specifying the frequency of the seasonality
+#' @param sales_data A vector containing historical sales data.
+#' @param frequency A numerical value specifying the frequency of the seasonality.
 #' @param start A vector of length 2 with the date of the first observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param end A vector of length 2 with the date of the last observation.
@@ -151,7 +151,11 @@ baseline <- function(sales_data,
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param criterion A string variable specifying the selection criterion that should be used to
 #' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
-#' can also be used to reflect the needs of the company
+#' can also be used to reflect the needs of the company.
+#' @param sizeroll The window of the moving average or moving median when using 
+#' the baseline () function. 
+#' @param smoother The smoother that should be considered when using the baseline () function. 
+#' It can be "mean", "median" or "loess".
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervals, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -660,8 +664,8 @@ predict_baseline <- function(sales_data,
 #' @description This function enables to create sales forecast based on historical
 #' sales data. It considers a multitude of models and selects the model that had
 #' the best performance on the testing set.
-#' @param sales_data A vector containing historical sales data
-#' @param frequency A numerical value specifying the frequency of the seasonality
+#' @param sales_data A vector containing historical sales data.
+#' @param frequency A numerical value specifying the frequency of the seasonality.
 #' @param start A vector of length 2 with the date of the first observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param end A vector of length 2 with the date of the last observation.
@@ -669,13 +673,19 @@ predict_baseline <- function(sales_data,
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
 #' @param size.te.set A integer value specifying the size of the training set 
 #' @param promo_done A logical variable specifying if promotions are done for the product.
-#' @param future_promotions Optionnal: a vector composed on binary variables which are
-#' equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.
+#' @param future_impactors To be inputted when using a dynamic model (when promo_done == TRUE).
+#' A matrix composed of multiple vectors. For promotions, the vector is composed of binary variables 
+#' which are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
+#' Other vectors can also be inputted totake into account other impactors. 
 #' @param criterion A string variable specifying the selection criterion that should be used to
 #' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
 #' can also be used to reflect the needs of the company.
+#' @param sizeroll The window of the moving average or moving median when using 
+#' the baseline () function. 
+#' @param smoother The smoother that should be considered when using the baseline () function. 
+#' It can be "mean", "median" or "loess".
 #' @return A list containing the select model, the associated graphs, the predictions and the
-#' confidence intervales, the accuracy measures and the same elements for all other considered models.
+#' confidence intervals, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
 #' @importFrom magrittr %>%
 #' @export
@@ -690,12 +700,14 @@ predict_sales <- function(sales_data,
                           forecast_horizon = 52,
                           size.te.set = 52, 
                           promo_done = FALSE,
-                          future_promotions = NA,
-                          criterion = "accuracy") {
+                          future_impactors = NA,
+                          criterion = "accuracy", 
+                          sizeroll = 11,
+                          smoother = "mean") {
   
-  if (length(future_promotions) != forecast_horizon && !is.na(future_promotions)) {
-    warning("future_promotions should be the same length as the forecasting horizon")
-  } else if (promo_done == TRUE && is.na(future_promotions)) {
+  if (length(future_impactors) != forecast_horizon && !is.na(future_impactors)) {
+    warning("future_impactors should be the same length as the forecasting horizon")
+  } else if (promo_done == TRUE && is.na(future_impactors)) {
     warning("If the product is subject to historical promotions, you also have to
             specify the future promotions")
   } else {
@@ -1140,7 +1152,7 @@ predict_sales <- function(sales_data,
         forecast::forecast(xreg = promos_test, h = forecast_horizon, level = 0.95) # forecasts
       fcst_dyna_future <- ts_actuals %>%
         forecast::auto.arima(xreg = promos) %>%
-        forecast::forecast(h = forecast_horizon, xreg = future_promotions, level = 0.95) # forecasts
+        forecast::forecast(h = forecast_horizon, xreg = future_impactors, level = 0.95) # forecasts
       
       
       plot_dyna_actuals <- ggplot2::autoplot(ts_actuals_test) +

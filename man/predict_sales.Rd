@@ -6,12 +6,13 @@
 \usage{
 predict_sales(sales_data, frequency = 52, start = c(2014, 1),
   end = c(2019, 12), forecast_horizon = 52, size.te.set = 52,
-  promo_done = FALSE, future_promotions = NA, criterion = "MAPE")
+  promo_done = FALSE, future_impactors = NA, criterion = "accuracy",
+  sizeroll = 11, smoother = "mean")
 }
 \arguments{
-\item{sales_data}{A vector containing historical sales data}
+\item{sales_data}{A vector containing historical sales data.}
 
-\item{frequency}{A numerical value specifying the frequency of the seasonality}
+\item{frequency}{A numerical value specifying the frequency of the seasonality.}
 
 \item{start}{A vector of length 2 with the date of the first observation.
 It contains first the year and then the day/week/month according to your data.}
@@ -25,15 +26,24 @@ It contains first the year and then the day/week/month according to your data.}
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
-\item{future_promotions}{Optionnal: a vector composed on binary variables which are
-equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.}
+\item{future_impactors}{To be inputted when using a dynamic model (when promo_done == TRUE).
+A matrix composed of multiple vectors. For promotions, the vector is composed of binary variables 
+which are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
+Other vectors can also be inputted totake into account other impactors.}
 
 \item{criterion}{A string variable specifying the selection criterion that should be used to
-select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").}
+select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+can also be used to reflect the needs of the company.}
+
+\item{sizeroll}{The window of the moving average or moving median when using 
+the baseline () function.}
+
+\item{smoother}{The smoother that should be considered when using the baseline () function. 
+It can be "mean", "median" or "loess".}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the
-confidence intervales, the accuracy measures and the same elements for all other considered models.
+confidence intervals, the accuracy measures and the same elements for all other considered models.
 }
 \description{
 This function enables to create sales forecast based on historical
