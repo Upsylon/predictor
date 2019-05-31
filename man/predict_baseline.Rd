@@ -27,7 +27,8 @@ It contains first the year and then the day/week/month according to your data.}
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
 \item{criterion}{A string variable specifying the selection criterion that should be used to
-select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").}
+select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+can also be used to reflect the needs of the company}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the

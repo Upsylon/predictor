@@ -6,7 +6,7 @@
 \usage{
 predict_sales(sales_data, frequency = 52, start = c(2014, 1),
   end = c(2019, 12), forecast_horizon = 52, size.te.set = 52,
-  promo_done = FALSE, future_promotions = NA, criterion = "MAPE")
+  promo_done = FALSE, future_promotions = NA, criterion = "accuracy")
 }
 \arguments{
 \item{sales_data}{A vector containing historical sales data}
@@ -29,7 +29,8 @@ It contains first the year and then the day/week/month according to your data.}
 equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise.}
 
 \item{criterion}{A string variable specifying the selection criterion that should be used to
-select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U").}
+select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+can also be used to reflect the needs of the company.}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the
