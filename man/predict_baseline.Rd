@@ -22,7 +22,7 @@ It contains first the year and then the day/week/month according to your data.}
 
 \item{forecast_horizon}{An integer value specifying the number of observations to forecast.}
 
-\item{size.te.set}{A integer value specifying the size of the training set}
+\item{size.te.set}{An integer value specifying the size of the testing set.}
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
@@ -31,9 +31,9 @@ select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U
 can also be used to reflect the needs of the company.}
 
 \item{sizeroll}{The window of the moving average or moving median when using 
-the baseline () function.}
+the baseline() function.}
 
-\item{smoother}{The smoother that should be considered when using the baseline () function. 
+\item{smoother}{The smoother that should be considered when using the baseline() function. 
 It can be "mean", "median" or "loess".}
 }
 \value{
@@ -42,7 +42,7 @@ confidence intervals, the accuracy measures and the same elements for all other 
 }
 \description{
 This function enables to create the baseline sales forecast based on historical
-sales data. It generates an historical baseline, considers a multitude of models
+sales data. It generates a historical baseline, considers a multitude of models
 and selects the model that had the best performance on the testing set.
 }
 \examples{

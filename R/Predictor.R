@@ -1,19 +1,18 @@
 #' @title Generates a baseline based on historical data
 #' @description This function enables to generate a baseline based on historical
 #' sales data and to plot the graphs linked to the different step of the
-#' process to have a deep view on a given series. It eliminates the role of external impactor that have a significant
+#' process to have a deep view on a given series. It eliminates the role of external impactors that have a significant
 #' effect on the sales to obtain a smooth baseline.
 #' @param sales_data A vector containing historical sales data
 #' @param promo_done A logical variable specifying if promotions are done for the product.
-#' @param sizeroll An odd integer that determine the width of the rolling median
+#' @param sizeroll An odd integer that determines the width of the rolling median
 #' and rolling average to take.
 #' @param smoother The smoother that should be considered. It can be "mean", "median" or "loess".
-#' @param showgraph A logical value. If TRUE, returns the different
-#' graphs obtained after each step of the process.
-#' @return A vector containing the baseline.
-#' @return A vector composed of binary variables that indicate whether an external
-#' impactor was detected in a given period.
-#' @return In option, the different graphs obtained in the process if showgraph is TRUE.
+#' @param showgraph A logical value. If TRUE, returns the graph obtained from the analysis.
+#' @return A vector containing the historical values, a vector containing the baseline, 
+#'  vector composed of binary variables that indicate whether an external impactor was detected 
+#'  for a given period.
+#' @return In option, the graph obtained in the process if *showgraph* == TRUE.
 #' @author Grandadam Patrik
 #' @importFrom magrittr %>%
 #' @export
@@ -138,7 +137,7 @@ baseline <- function(sales_data,
 
 #' @title Creates the forecast of the baseline of sales based on historical data
 #' @description This function enables to create the baseline sales forecast based on historical
-#' sales data. It generates an historical baseline, considers a multitude of models
+#' sales data. It generates a historical baseline, considers a multitude of models
 #' and selects the model that had the best performance on the testing set.
 #' @param sales_data A vector containing historical sales data.
 #' @param frequency A numerical value specifying the frequency of the seasonality.
@@ -147,14 +146,14 @@ baseline <- function(sales_data,
 #' @param end A vector of length 2 with the date of the last observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
-#' @param size.te.set A integer value specifying the size of the training set 
+#' @param size.te.set An integer value specifying the size of the testing set.
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param criterion A string variable specifying the selection criterion that should be used to
 #' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
 #' can also be used to reflect the needs of the company.
 #' @param sizeroll The window of the moving average or moving median when using 
-#' the baseline () function. 
-#' @param smoother The smoother that should be considered when using the baseline () function. 
+#' the baseline() function. 
+#' @param smoother The smoother that should be considered when using the baseline() function. 
 #' It can be "mean", "median" or "loess".
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervals, the accuracy measures and the same elements for all other considered models.
@@ -518,7 +517,7 @@ predict_baseline <- function(sales_data,
                          fill = "red", alpha = "0.3") +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
-    ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and nnet") +
+    ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and NNAR") +
     ggplot2::xlab("Years") +
     ggplot2::ylab("Sales") +
     ggplot2::scale_x_continuous(breaks = 
@@ -660,8 +659,8 @@ predict_baseline <- function(sales_data,
 }
 
 
-#' @title Creates sales forecast based on historical data
-#' @description This function enables to create sales forecast based on historical
+#' @title Creates forecasts based on historical data
+#' @description This function enables to create forecasts based on historical
 #' sales data. It considers a multitude of models and selects the model that had
 #' the best performance on the testing set.
 #' @param sales_data A vector containing historical sales data.
@@ -671,19 +670,17 @@ predict_baseline <- function(sales_data,
 #' @param end A vector of length 2 with the date of the last observation.
 #' It contains first the year and then the day/week/month according to your data.
 #' @param forecast_horizon An integer value specifying the number of observations to forecast.
-#' @param size.te.set A integer value specifying the size of the training set 
+#' @param size.te.set An integer value specifying the size of the testing set. 
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param future_impactors To be inputted when using a dynamic model (when promo_done == TRUE).
 #' A matrix composed of multiple vectors. For promotions, the vector is composed of binary variables 
-#' which are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
-#' Other vectors can also be inputted totake into account other impactors. 
+#' that are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
+#' Other vectors can also be inputted to take into account other impactors. 
 #' @param criterion A string variable specifying the selection criterion that should be used to
 #' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
 #' can also be used to reflect the needs of the company.
 #' @param sizeroll The window of the moving average or moving median when using 
-#' the baseline () function. 
-#' @param smoother The smoother that should be considered when using the baseline () function. 
-#' It can be "mean", "median" or "loess".
+#' the baseline() function. 
 #' @return A list containing the select model, the associated graphs, the predictions and the
 #' confidence intervals, the accuracy measures and the same elements for all other considered models.
 #' @author Grandadam Patrik
@@ -702,8 +699,7 @@ predict_sales <- function(sales_data,
                           promo_done = FALSE,
                           future_impactors = NA,
                           criterion = "accuracy", 
-                          sizeroll = 11,
-                          smoother = "mean") {
+                          sizeroll = 11) {
   
   if (length(future_impactors) != forecast_horizon && !is.na(future_impactors)) {
     warning("future_impactors should be the same length as the forecasting horizon")
@@ -1086,19 +1082,19 @@ predict_sales <- function(sales_data,
                            fcst_boot_nnet_actuals$mean + fcst_boot_stlf_actuals$mean)/6
     upper_actuals <- (fcst_arima_actuals$upper + fcst_stlf_actuals$upper +
                         fcst_stl_arima_actuals$upper +
-                        fcst_boot_nnet_actuals$upper + fcst_boot_stlf_actuals$upper)/6
+                        fcst_boot_nnet_actuals$upper + fcst_boot_stlf_actuals$upper)/5
     lower_actuals <- (fcst_arima_actuals$lower + fcst_stlf_actuals$lower +
                        fcst_stl_arima_actuals$lower +
-                        fcst_boot_nnet_actuals$lower + fcst_boot_stlf_actuals$lower)/6
+                        fcst_boot_nnet_actuals$lower + fcst_boot_stlf_actuals$lower)/5
     combined_future <- (fcst_arima_future$mean + fcst_stlf_future$mean +
                           fcst_nnet_future$mean + fcst_stl_arima_future$mean +
                           fcst_boot_nnet_future$mean + fcst_boot_stlf_future$mean)/6
     upper_future <- (fcst_arima_future$upper + fcst_stlf_future$upper +
                            fcst_stl_arima_future$upper +
-                          fcst_boot_nnet_future$upper + fcst_boot_stlf_future$upper)/6
+                          fcst_boot_nnet_future$upper + fcst_boot_stlf_future$upper)/5
     lower_future <- (fcst_arima_future$lower + fcst_stlf_future$lower +
                        fcst_stl_arima_future$lower +
-                       fcst_boot_nnet_future$lower + fcst_boot_stlf_future$lower)/6
+                       fcst_boot_nnet_future$lower + fcst_boot_stlf_future$lower)/5
     
     
     plot_combined_actuals <- ggplot2::autoplot(ts_actuals_test) +
@@ -1141,7 +1137,7 @@ predict_sales <- function(sales_data,
     
     if(promo_done == TRUE) {
       promos <- baseline(
-        sales_data, promo_done = TRUE, sizeroll = sizeroll, smoother = smoother)$promotions %>% 
+        sales_data, promo_done = TRUE, sizeroll = sizeroll, smoother = "mean")$promotions %>% 
         as.vector()
       promos_train <- promos[1:size.tr.set]
       promos_test <- promos[(size.tr.set + 1):length(sales_data)]
@@ -1312,7 +1308,7 @@ my_theme <- function(base_size = 10, base_family = "sans") {
 
 #' @title Forecasting accuracy as defined in the company
 #' @description This function enables to calculate the forecasting accuracy using
-#' the same reporting measure as the company
+#' the same reporting measure as the company.
 #' @param actuals The actuals that are observed. It can be the values of the
 #' testing set to evaluate the quality of a model, or the values that just have been observed
 #' to estimate the real accuracy . 

@@ -2,12 +2,12 @@
 % Please edit documentation in R/Predictor.R
 \name{predict_sales}
 \alias{predict_sales}
-\title{Creates sales forecast based on historical data}
+\title{Creates forecasts based on historical data}
 \usage{
 predict_sales(sales_data, frequency = 52, start = c(2014, 1),
   end = c(2019, 12), forecast_horizon = 52, size.te.set = 52,
   promo_done = FALSE, future_impactors = NA, criterion = "accuracy",
-  sizeroll = 11, smoother = "mean")
+  sizeroll = 11)
 }
 \arguments{
 \item{sales_data}{A vector containing historical sales data.}
@@ -22,31 +22,28 @@ It contains first the year and then the day/week/month according to your data.}
 
 \item{forecast_horizon}{An integer value specifying the number of observations to forecast.}
 
-\item{size.te.set}{A integer value specifying the size of the training set}
+\item{size.te.set}{An integer value specifying the size of the testing set.}
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
 \item{future_impactors}{To be inputted when using a dynamic model (when promo_done == TRUE).
 A matrix composed of multiple vectors. For promotions, the vector is composed of binary variables 
-which are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
-Other vectors can also be inputted totake into account other impactors.}
+that are equal to 1 when there will be a promotion in the forecasting horizon and to 0 otherwise. 
+Other vectors can also be inputted to take into account other impactors.}
 
 \item{criterion}{A string variable specifying the selection criterion that should be used to
 select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
 can also be used to reflect the needs of the company.}
 
 \item{sizeroll}{The window of the moving average or moving median when using 
-the baseline () function.}
-
-\item{smoother}{The smoother that should be considered when using the baseline () function. 
-It can be "mean", "median" or "loess".}
+the baseline() function.}
 }
 \value{
 A list containing the select model, the associated graphs, the predictions and the
 confidence intervals, the accuracy measures and the same elements for all other considered models.
 }
 \description{
-This function enables to create sales forecast based on historical
+This function enables to create forecasts based on historical
 sales data. It considers a multitude of models and selects the model that had
 the best performance on the testing set.
 }

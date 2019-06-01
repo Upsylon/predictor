@@ -12,26 +12,24 @@ baseline(sales_data, promo_done = FALSE, sizeroll = 11,
 
 \item{promo_done}{A logical variable specifying if promotions are done for the product.}
 
-\item{sizeroll}{An odd integer that determine the width of the rolling median
+\item{sizeroll}{An odd integer that determines the width of the rolling median
 and rolling average to take.}
 
 \item{smoother}{The smoother that should be considered. It can be "mean", "median" or "loess".}
 
-\item{showgraph}{A logical value. If TRUE, returns the different
-graphs obtained after each step of the process.}
+\item{showgraph}{A logical value. If TRUE, returns the graph obtained from the analysis.}
 }
 \value{
-A vector containing the baseline.
+A vector containing the historical values, a vector containing the baseline, 
+ vector composed of binary variables that indicate whether an external impactor was detected 
+ for a given period.
 
-A vector composed of binary variables that indicate whether an external
-impactor was detected in a given period.
-
-In option, the different graphs obtained in the process if showgraph is TRUE.
+In option, the graph obtained in the process if *showgraph* == TRUE.
 }
 \description{
 This function enables to generate a baseline based on historical
 sales data and to plot the graphs linked to the different step of the
-process to have a deep view on a given series. It eliminates the role of external impactor that have a significant
+process to have a deep view on a given series. It eliminates the role of external impactors that have a significant
 effect on the sales to obtain a smooth baseline.
 }
 \examples{
