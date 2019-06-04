@@ -15,7 +15,7 @@ to estimate the real accuracy .}
 }
 \description{
 This function enables to calculate the forecasting accuracy using
-the same reporting measure as the company
+the same reporting measure as the company.
 }
 \author{
 Grandadam Patrik
