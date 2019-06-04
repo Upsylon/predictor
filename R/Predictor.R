@@ -17,7 +17,8 @@
 #' @importFrom magrittr %>%
 #' @export
 #' @examples
-#' baseline() ###################### A COMPLETER ###############
+#' data("mydata") 
+#' baseline(mydata)
 
 baseline <- function(sales_data,
                      promo_done = FALSE,

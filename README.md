@@ -9,7 +9,7 @@ library(predictor) # load the package
 
 ## Utilisation :computer:
 
-The package is composed of four functions:
+The package is composed of four functions:  
     - baseline()  
     - predict_baseline()  
     - predict_sales()  
