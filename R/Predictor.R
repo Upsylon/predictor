@@ -18,7 +18,7 @@
 #' @export
 #' @examples
 #' data("mydata") 
-#' baseline(mydata)
+#' baseline(mydata, promo_done = TRUE, showgraph = TRUE)
 
 baseline <- function(sales_data,
                      promo_done = FALSE,
@@ -162,7 +162,8 @@ baseline <- function(sales_data,
 #' @importFrom magrittr %>%
 #' @export
 #' @examples
-#' predict_baseline ###################### A COMPLETER ###############
+#' data("mydata")
+#' predict_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
 
 predict_baseline <- function(sales_data,
                              frequency = 52,
@@ -688,7 +689,8 @@ predict_baseline <- function(sales_data,
 #' @importFrom magrittr %>%
 #' @export
 #' @examples
-#' predict_sales ###################### A COMPLETER ###############
+#' data("mydata")
+#' predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
 
 
 predict_sales <- function(sales_data,
