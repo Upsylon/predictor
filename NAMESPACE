@@ -2,6 +2,7 @@
 
 export(baseline)
 export(my_theme)
+export(oos_simulation)
 export(percent_accuracy)
 export(predict_baseline)
 export(predict_sales)

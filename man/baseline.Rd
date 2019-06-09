@@ -24,16 +24,16 @@ A vector containing the historical values, a vector containing the baseline,
  vector composed of binary variables that indicate whether an external impactor was detected 
  for a given period.
 
-In option, the graph obtained in the process if *showgraph* == TRUE.
+In option, the graph obtained in the process if showgraph == TRUE.
 }
 \description{
 This function enables to generate a baseline based on historical
-sales data and to plot the graphs linked to the different step of the
-process to have a deep view on a given series. It eliminates the role of external impactors that have a significant
-effect on the sales to obtain a smooth baseline.
+sales data and to plot the resulting graph. It eliminates the role of external impactors that 
+have a significant effect on the sales to obtain a smooth baseline.
 }
 \examples{
-baseline() ###################### A COMPLETER ###############
+data("mydata") 
+baseline(mydata, promo_done = TRUE, showgraph = TRUE)
 }
 \author{
 Grandadam Patrik

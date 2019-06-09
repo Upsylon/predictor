@@ -48,7 +48,9 @@ sales data. It considers a multitude of models and selects the model that had
 the best performance on the testing set.
 }
 \examples{
-predict_sales ###################### A COMPLETER ###############
+data("mydata")
+my_predictions <- predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
+my_predictions
 }
 \author{
 Grandadam Patrik

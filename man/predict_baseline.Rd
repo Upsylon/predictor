@@ -46,7 +46,9 @@ sales data. It generates a historical baseline, considers a multitude of models
 and selects the model that had the best performance on the testing set.
 }
 \examples{
-predict_baseline ###################### A COMPLETER ###############
+data("mydata")
+my_baseline <- predict_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
+my_baseline
 }
 \author{
 Grandadam Patrik

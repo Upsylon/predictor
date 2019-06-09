@@ -1,8 +1,7 @@
 #' @title Generates a baseline based on historical data
 #' @description This function enables to generate a baseline based on historical
-#' sales data and to plot the graphs linked to the different step of the
-#' process to have a deep view on a given series. It eliminates the role of external impactors that have a significant
-#' effect on the sales to obtain a smooth baseline.
+#' sales data and to plot the resulting graph. It eliminates the role of external impactors that 
+#' have a significant effect on the sales to obtain a smooth baseline.
 #' @param sales_data A vector containing historical sales data
 #' @param promo_done A logical variable specifying if promotions are done for the product.
 #' @param sizeroll An odd integer that determines the width of the rolling median
@@ -12,7 +11,7 @@
 #' @return A vector containing the historical values, a vector containing the baseline, 
 #'  vector composed of binary variables that indicate whether an external impactor was detected 
 #'  for a given period.
-#' @return In option, the graph obtained in the process if *showgraph* == TRUE.
+#' @return In option, the graph obtained in the process if showgraph == TRUE.
 #' @author Grandadam Patrik
 #' @importFrom magrittr %>%
 #' @export
@@ -163,7 +162,8 @@ baseline <- function(sales_data,
 #' @export
 #' @examples
 #' data("mydata")
-#' predict_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
+#' my_baseline <- predict_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
+#' my_baseline
 
 predict_baseline <- function(sales_data,
                              frequency = 52,
@@ -690,7 +690,8 @@ predict_baseline <- function(sales_data,
 #' @export
 #' @examples
 #' data("mydata")
-#' predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
+#' my_predictions <- predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
+#' my_predictions
 
 
 predict_sales <- function(sales_data,
@@ -1322,7 +1323,48 @@ percent_accuracy <- function(forecast, actuals) {
   mean(1 - abs(forecast - actuals) / forecast)
 }
 
-
-
-
-
+#' @title Simulating the stock level and OOS probability
+#' @description This function enables to calculate the expected stock level at the end of 
+#' periods according to the current stock, the future forecasts, the productions. It is based on 
+#' a Monte Carlo simulation that explores multiple demand scenarios. 
+#' @param forecast A vector containing the forecasts of the future values
+#' @param sd The standard deviation of the forecasts
+#' @param productions A vector containing the future productions
+#' @param stock The current level of stock
+#' @param nsim The number of simulations to operate
+#' @author Grandadam Patrik
+#' @export
+#' @examples oos_simulation(
+#' forecast = c(400, 380, 420, 560, 500, 480, 570, 600, 560, 590),
+#' sd = 100,
+#' productions = c(0, 0, 0, 2900, 0, 0, 0, 2000, 0, 0), 
+#' stock = 1350,
+#' nsim = 1000
+#' )
+oos_simulation <- function(forecast, sd, productions, stock, nsim = 1000) {
+  
+  if(length(forecast) != length(productions)) {
+    warning("The forecast should consider the same time horizon as the productions")
+  } else{
+    
+    simulated_demand <- matrix(ncol = length(forecast), nrow = nsim)
+    stock_level <- matrix(ncol = length(forecast), nrow = nsim)
+    proba <- vector(length = length(forecast))
+    
+    for(i in 1:nsim) {
+      simulated_demand[i, ] <- forecast + rnorm(length(forecast), sd = sd) 
+      for(j in 2:length(forecast)) {
+        stock_level[i, 1] <- stock + productions[1] - simulated_demand[i, 1]
+        stock_level[i, j] <- stock_level[i, j - 1] + productions[j] - simulated_demand[i, j]
+      }
+      out_of_stock <- ifelse(stock_level <= 0, 1, 0)
+    }
+    
+    week_stock <- colMeans(stock_level)
+    probability <- colMeans(out_of_stock)
+    
+    
+    return(list(expected_stock = week_stock, OOS_proba = probability))
+    
+  }
+}
