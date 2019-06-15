@@ -17,7 +17,7 @@ The package is composed of six functions:
     - my_theme()  
     - oos_simulation
     
-To understand their way of working and the arguments, please refer to the help of the concerned functions.
+To understand their way of working and the arguments, please refer to the help page of the concerned functions.
 
 
 
