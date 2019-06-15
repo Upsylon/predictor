@@ -33,7 +33,10 @@ have a significant effect on the sales to obtain a smooth baseline.
 }
 \examples{
 data("mydata") 
-baseline(mydata, promo_done = TRUE, showgraph = TRUE)
+my_baseline <- baseline(mydata, promo_done = TRUE, showgraph = TRUE)
+my_baseline$selected_model$PLOT # the plot of the selected model
+my_baseline$selected_model$FORECAST # the forecast of the selected model
+my_baseline$selected_model$ACCURACIES # the accuracies of the selected model
 }
 \author{
 Grandadam Patrik

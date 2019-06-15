@@ -17,7 +17,10 @@
 #' @export
 #' @examples
 #' data("mydata") 
-#' baseline(mydata, promo_done = TRUE, showgraph = TRUE)
+#' my_baseline <- baseline(mydata, promo_done = TRUE, showgraph = TRUE)
+#' my_baseline$selected_model$PLOT # the plot of the selected model
+#' my_baseline$selected_model$FORECAST # the forecast of the selected model
+#' my_baseline$selected_model$ACCURACIES # the accuracies of the selected model
 
 baseline <- function(sales_data,
                      promo_done = FALSE,
@@ -119,7 +122,7 @@ baseline <- function(sales_data,
     ggplot2::geom_line(ggplot2::aes(week, smoothed_baseline[, 1]), col = 'red') +
     ggplot2::geom_line(ggplot2::aes(week, sales_data[, 1])) +
     ggplot2::ggtitle(stringr::str_c("The final baseline")) +
-    ggplot2::labs(x = "Weeks", y = "Sales Quantity") +
+    ggplot2::labs(x = "Years", y = "Sales Quantity") +
     my_theme()
   
   
@@ -692,6 +695,9 @@ predict_baseline <- function(sales_data,
 #' data("mydata")
 #' my_predictions <- predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
 #' my_predictions
+#' my_predictions$selected_model$PLOT # the plot of the selected model
+#' my_predictions$selected_model$FORECAST # the forecast of the selected model
+#' my_predictions$all_models$arima # all components of the arima model
 
 
 predict_sales <- function(sales_data,

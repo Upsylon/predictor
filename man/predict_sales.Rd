@@ -51,6 +51,9 @@ the best performance on the testing set.
 data("mydata")
 my_predictions <- predict_sales(mydata, promo_done = TRUE, future_impactor = c(0,1,0, rep(c(rep(0,6),1), 7)))
 my_predictions
+my_predictions$selected_model$PLOT # the plot of the selected model
+my_predictions$selected_model$FORECAST # the forecast of the selected model
+my_predictions$all_models$arima # all components of the arima model
 }
 \author{
 Grandadam Patrik
