@@ -122,7 +122,7 @@ baseline <- function(sales_data,
     ggplot2::geom_line(ggplot2::aes(week, smoothed_baseline[, 1]), col = 'red') +
     ggplot2::geom_line(ggplot2::aes(week, sales_data[, 1])) +
     ggplot2::ggtitle(stringr::str_c("The final baseline")) +
-    ggplot2::labs(x = "Years", y = "Sales Quantity") +
+    ggplot2::labs(x = "Weeks", y = "Sales Quantity") +
     my_theme()
   
   
