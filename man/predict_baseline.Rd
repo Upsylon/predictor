@@ -48,7 +48,9 @@ and selects the model that had the best performance on the testing set.
 \examples{
 data("mydata")
 my_baseline <- predict_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
-my_baseline
+my_baseline$selected_model$PLOT # the plot of the selected model
+my_baseline$selected_model$FORECAST # the forecast of the selected model
+my_baseline$selected_model$ACCURACIES # the accuracies of the selected model
 }
 \author{
 Grandadam Patrik
