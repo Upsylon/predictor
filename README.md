@@ -15,7 +15,7 @@ The package is composed of six functions:
     - predict_sales()  
     - my_theme()  
     - my_theme()  
-    - oos_simulation
+    - oos_simulation()
     
 To understand their way of working and the arguments, please refer to the help page of the concerned functions.
 
