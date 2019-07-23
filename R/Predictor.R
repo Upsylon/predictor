@@ -1375,3 +1375,202 @@ oos_simulation <- function(forecast, sd, productions, stock, nsim = 1000) {
     
   }
 }
+
+
+#' @title Creates the forecast of the baseline of sales based on historical data using only fast models
+#' @description This function has the same purpose as the predict_baseline() function but uses 
+#' only the models which computation time are the smallest. 
+#' @param sales_data A vector containing historical sales data.
+#' @param frequency A numerical value specifying the frequency of the seasonality.
+#' @param start A vector of length 2 with the date of the first observation.
+#' It contains first the year and then the day/week/month according to your data.
+#' @param forecast_horizon An integer value specifying the number of observations to forecast.
+#' @param size.te.set An integer value specifying the size of the testing set.
+#' @param promo_done A logical variable specifying if promotions are done for the product.
+#' @param criterion A string variable specifying the selection criterion that should be used to
+#' select the model ("ME", "RMSE", "MAE", "MPE", "MAPE", "MASE", "ACF1", "Theil's U"). "accuracy"
+#' can also be used to reflect the needs of the company.
+#' @param sizeroll The window of the moving average or moving median when using 
+#' the baseline() function. 
+#' @param smoother The smoother that should be considered when using the baseline() function. 
+#' It can be "mean", "median" or "loess".
+#' @return A list containing the select model, the associated graphs, the predictions and the
+#' confidence intervals, the accuracy measures and the same elements for all other considered models.
+#' @author Grandadam Patrik
+#' @importFrom magrittr %>%
+#' @export
+#' @examples
+#' data("mydata")
+#' my_baseline <- predict_baseline_baseline(mydata, promo_done = TRUE, criterion = "MAPE")
+#' my_baseline$selected_model$PLOT # the plot of the selected model
+#' my_baseline$selected_model$FORECAST # the forecast of the selected model
+#' my_baseline$selected_model$ACCURACIES # the accuracies of the selected model
+
+predict_baseline_fast <- function(sales_data,
+                                  frequency = 52,
+                                  start = c(2014, 1),
+                                  forecast_horizon = 52,
+                                  size.te.set = 52,
+                                  promo_done = FALSE, 
+                                  criterion = "accuracy", 
+                                  sizeroll = 11) {
+  
+  # the original data, train and test set converted into a time series
+  ts_actuals <- stats::ts(
+    sales_data, start = start, frequency = frequency)
+  
+  ts_actuals_train <- head(ts_actuals, length(ts_actuals) - size.te.set)
+  ts_actuals_test <- tail(ts_actuals, length(ts_actuals) - length(ts_actuals_train))
+  
+  # Creation of training and testing set (not time series format)
+  size.tr.set <- length(sales_data) - size.te.set
+  tr.set <- sales_data[1:size.tr.set]
+  te.set <- sales_data[(size.tr.set + 1):length(sales_data)]
+  
+  # Creation of the baseline and training/testing set of the baseline
+  original_baseline <- 
+    baseline(sales_data, promo_done = promo_done, sizeroll = sizeroll)$baseline
+  tr.set.baseline <- original_baseline[1:size.tr.set]
+  te.set.baseline <- original_baseline[(size.tr.set + 1):length(original_baseline)]
+  ts_baseline <- stats::ts(
+    original_baseline, start = start, frequency = frequency)
+  
+  ts_baseline_train <- head(ts_baseline, length(ts_actuals) - size.te.set)
+  
+  ts_baseline_test <- tail(ts_baseline, length(ts_actuals) - length(ts_actuals_train))
+  
+  ## STL + ARIMA
+  if (frequency >= 52) {
+    fcst_stl_arima_baseline <- ts_baseline_train %>%
+      forecast::forecast(method = "arima", h = size.te.set, level = 0.95)
+    fcst_stl_arima_future <- ts_baseline %>%
+      forecast::forecast(method = "arima", h = forecast_horizon, level = 0.95)
+  } else {
+    fcst_stl_arima_baseline <- ts_baseline_train %>%
+      forecast::forecast(h = size.te.set, level = 0.95)
+    fcst_stl_arima_future <- ts_baseline %>%
+      forecast::forecast(h = forecast_horizon, level = 0.95)
+  }
+  
+  plot_stl_arima_baseline <- ggplot2::autoplot(ts_baseline_test) +
+    ggplot2::autolayer(fcst_stl_arima_future,
+                       series = "Forecasted future baseline", level = FALSE) +
+    ggplot2::autolayer(ts_baseline, series = "Baseline") +
+    ggplot2::autolayer(fcst_stl_arima_baseline,
+                       series = "Forecasted baseline on testing set", level = FALSE) +
+    ggplot2::autolayer(ts_actuals, series = "Actuals") +
+    ggplot2::geom_ribbon(data = ts_baseline_test,
+                         ggplot2::aes(ymin = fcst_stl_arima_baseline$lower,
+                                      ymax = fcst_stl_arima_baseline$upper),
+                         fill = "blue", alpha = "0.3") +
+    ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
+                         ggplot2::aes(ymin = fcst_stl_arima_future$lower, 
+                                      ymax = fcst_stl_arima_future$upper),
+                         fill = "red", alpha = "0.3") +
+    ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
+                            fcst_stl_arima_future$method)) +
+    ggplot2::xlab("Years") +
+    ggplot2::ylab("Sales") +
+    ggplot2::scale_x_continuous(breaks = 
+                                  seq(start(ts_actuals)[[1]], end(ts_actuals)[[1]] + 
+                                        forecast_horizon/frequency)) +
+    my_theme()
+  
+  acc_stl_arima_baseline <- fcst_stl_arima_baseline %>% forecast::accuracy(ts_baseline) 
+  accuracy <- percent_accuracy(fcst_stl_arima_baseline$mean, te.set.baseline)
+  acc_stl_arima_baseline <- cbind(acc_stl_arima_baseline, accuracy) 
+  criterion_stl_arima_baseline <- acc_stl_arima_baseline[2, criterion] # the criterion
+  stl_arima_baseline <- list(MODEL = fcst_stl_arima_future$method,
+                             TEST_SET = fcst_stl_arima_baseline$mean,
+                             FORECAST = fcst_stl_arima_future$mean,
+                             lower_95 = fcst_stl_arima_future$lower,
+                             Upper_95 = fcst_stl_arima_future$upper,
+                             PLOT = plot_stl_arima_baseline,
+                             ACCURACIES = acc_stl_arima_baseline,
+                             CRITERION =  criterion_stl_arima_baseline)
+  
+  
+  
+  
+  
+  
+  
+  ## stlf on the baseline
+  fcst_stlf_baseline <- ts_baseline_train %>% 
+    forecast::stlf(level = 0.95) %>% 
+    forecast::forecast(h = size.te.set) # forecasts baseline test
+  fcst_stlf_baseline_future <- ts_baseline %>% forecast::stlf(level = 0.95) %>%
+    forecast::forecast(h = forecast_horizon) # stlf on everything
+  
+  plot_stlf_baseline <- ggplot2::autoplot(ts_baseline_test) +
+    ggplot2::autolayer(fcst_stlf_baseline_future,
+                       series = "Forecasted future baseline", level = FALSE) +
+    ggplot2::autolayer(ts_baseline, series = "Baseline") +
+    ggplot2::autolayer(fcst_stlf_baseline,
+                       series = "Forecasted baseline on testing set", level = FALSE) +
+    ggplot2::autolayer(ts_actuals, series = "Actuals") +
+    ggplot2::geom_ribbon(data = ts_baseline_test,
+                         ggplot2::aes(ymin = fcst_stlf_baseline$lower,
+                                      ymax = fcst_stlf_baseline$upper),
+                         fill = "blue", alpha = "0.3") +
+    ggplot2::geom_ribbon(data = fcst_stlf_baseline_future$mean,
+                         ggplot2::aes(ymin = fcst_stlf_baseline_future$lower,
+                                      ymax = fcst_stlf_baseline_future$upper),
+                         fill = "red", alpha = "0.3") +
+    ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
+    ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
+                            fcst_stlf_baseline_future$method)) +
+    ggplot2::xlab("Years") +
+    ggplot2::ylab("Sales") +
+    ggplot2::scale_x_continuous(breaks = seq(start(ts_actuals)[[1]], end(ts_actuals)[[1]] + 
+                                               forecast_horizon/frequency)) +
+    my_theme()
+  acc_stlf_baseline <- fcst_stlf_baseline %>% forecast::accuracy(ts_baseline) # accuracy
+  accuracy <- percent_accuracy(fcst_stlf_baseline$mean, te.set.baseline)
+  acc_stlf_baseline <- cbind(acc_stlf_baseline, accuracy) 
+  criterion_stlf_baseline <- acc_stlf_baseline[2, criterion] # MAPE
+  stlf_model_baseline <- list(MODEL = fcst_stlf_baseline_future$method,
+                              TEST_SET = fcst_stlf_baseline$mean,
+                              FORECAST = fcst_stlf_baseline_future$mean,
+                              lower_95 = fcst_stlf_baseline_future$lower,
+                              Upper_95 = fcst_stlf_baseline_future$upper,
+                              PLOT = plot_stlf_baseline,
+                              ACCURACIES = acc_stlf_baseline,
+                              CRITERION =  criterion_stlf_baseline)
+  
+  
+  
+  
+  # performance of each model
+  criterions <- c( criterion_stl_arima_baseline = criterion_stl_arima_baseline, 
+                   criterion_stlf_baseline = criterion_stlf_baseline
+  )
+  
+  if (criterion == "ME" | 
+      criterion == "RMSE" | 
+      criterion == "MAE" | 
+      criterion == "MPE" | 
+      criterion == "MAPE" |
+      criterion == "MASE" |
+      criterion == "ACF1") {
+    
+    if(names(which.min(criterions)) ==  "criterion_stl_arima_baseline") {
+      retained_model <- stl_arima_baseline
+    } else if(names(which.min(criterions)) ==  "criterion_stlf_baseline") {
+      retained_model <- stlf_model_baseline
+    }
+  } else if (criterion == "Theil's U" | 
+             criterion == "accuracy") {
+    if(names(which.max(criterions)) ==  "criterion_stl_arima_baseline") {
+      retained_model <- stl_arima_baseline
+    } else if(names(which.max(criterions)) ==  "criterion_stlf_baseline") {
+      retained_model <- stlf_model_baseline
+    }
+  }
+  
+  
+  return(selected_model = retained_model)
+  
+}
+
