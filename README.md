@@ -6,7 +6,7 @@ Finally, it makes the life of the user simpler by **minimizing the code** needed
 
 Based on historical sales data, the forecasts are computed automatically.
 
-It includes an outlier detection algorithm and the use of multiple predictive models (ARIMA, STLF, ETS, Neural-Networks). The performance of each model is then evaluated and the predictions computed.
+It includes an outlier detection algorithm and the use of multiple predictive models (ARIMA, STLF, ETS, Neural-Networks). The performance of each model is then evaluated. The best model is selected and the predictions are computed.
 
 This package comes with a **Shiny App**:  
 https://upsy.shinyapps.io/Predictor_Baseline/
