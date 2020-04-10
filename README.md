@@ -13,8 +13,9 @@ https://upsy.shinyapps.io/Predictor_Baseline/
 
 With its ease of use, the Shiny App would enable a baby to make accurate predictions! :grin:  
 The user can load data, vizualize the shape of the predictions and download the results.   
-The default parameters ensure a meaningful initial setting that the user is free to change. All this **without any code**. 
+The default parameters ensure a meaningful initial setting that the user is free to change. All this **without any code**.
 
+The "Sample.csv" file in this repository can be used for demonstration purpose. 
 
 ## Downloading the package :cd:
 
