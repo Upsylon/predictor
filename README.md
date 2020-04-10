@@ -1,3 +1,13 @@
+## Objectives of the package :dart:
+
+The package is designed to automate the forecasting process of future sales.  
+
+Based on historical sales data, the forecasts are computed automatically.
+It includes an outlier detection algorithm, the use of multiple predictive models (ARIMA, STLF, ETS, Neural-Networks). The performance of each model is then evaluated and the predictions computed.
+
+This package comes with a Shiny App:  
+https://upsy.shinyapps.io/Predictor_Baseline/
+
 ## Downloading the package :cd:
 
 The package can be downloaded using the following functions:
@@ -20,7 +30,7 @@ The package is composed of six functions:
     - my_theme()  
     - oos_simulation()
     
-To understand their way of working and the arguments, please refer to the help page of the concerned functions.
+Their objectives and utilisation is detailed in their description.
 
 
 
