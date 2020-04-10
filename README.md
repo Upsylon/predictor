@@ -9,7 +9,7 @@ Finally, it makes the life of the user simpler by **minimizing the code** needed
 It includes an outlier detection algorithm and the use of multiple predictive models (ARIMA, STLF, ETS, Neural-Networks). The performance of each model is then evaluated. The best model is selected and the predictions are computed.
 
 This package comes with a **Shiny App**:  
-https://upsy.shinyapps.io/Predictor_Baseline/  
+https://upsy.shinyapps.io/Predictor/
 
 With its ease of use, the Shiny App would enable a baby to make accurate predictions! :grin:  
 The user can **load data**, **vizualize** the shape of the predictions and **download** the results.   
