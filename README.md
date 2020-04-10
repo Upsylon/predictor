@@ -36,15 +36,7 @@ library(predictor) # load the package
 
 ## Utilisation :computer:
 
-The package is composed of six functions:  
-    - baseline()  
-    - predict_baseline()  
-    - predict_sales()  
-    - my_theme()  
-    - my_theme()  
-    - oos_simulation()
-    
-Their objectives and utilisation is detailed in their description.
+The package is composed of multiple function. Their objectives and utilisation is detailed in their description.
 
 
 
