@@ -1,4 +1,4 @@
-## Context
+## Context :books:
 
 This package has been built as part of my Master Thesis in the *Business Analytics* orientation of the Master in Management at HEC Lausanne, for which I obtained the grade of 6/6.  
 The slides of the presentation are available in this repository.
