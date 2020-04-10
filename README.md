@@ -3,6 +3,9 @@
 The package can be downloaded using the following functions:
 
 ```{r, eval = FALSE, echo = TRUE}
+if (!require("devtools"))
+  install.packages("devtools")
+  
 devtools::install_github("Upsylon/predictor") # install the package
 library(predictor) # load the package
 ```
