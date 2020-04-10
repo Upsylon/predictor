@@ -1,8 +1,8 @@
 ## Objectives of the package :dart:
 
-The objective package is designed to **automate the forecasting process** of sales. 
-It implements a complete procedure that leads to accurate results using a **reproducible methodology**. 
-Finally, it makes the life of the user simpler by **minimizing the code** needed.  
+The objective package is designed to **automate the forecasting process** of sales.   
+It implements a complete procedure that leads to accurate results using a **reproducible methodology**.   
+Finally, it makes the life of the user simpler by **minimizing the code** needed.     
 
 Based on historical sales data, the forecasts are computed automatically.
 
