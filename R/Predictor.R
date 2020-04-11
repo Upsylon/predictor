@@ -226,11 +226,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_stl_arima_baseline$lower,
                                       ymax = fcst_stl_arima_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
                          ggplot2::aes(ymin = fcst_stl_arima_future$lower, 
                                       ymax = fcst_stl_arima_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
                             fcst_stl_arima_future$method)) +
@@ -274,11 +274,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_arima_baseline$lower,
                                       ymax = fcst_arima_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_arima_future$mean,
                          ggplot2::aes(ymin = fcst_arima_future$lower, 
                                       ymax = fcst_arima_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
                             fcst_arima_future$method)) +
@@ -318,11 +318,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_stlf_baseline$lower,
                                       ymax = fcst_stlf_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_stlf_baseline_future$mean,
                          ggplot2::aes(ymin = fcst_stlf_baseline_future$lower,
                                       ymax = fcst_stlf_baseline_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
                             fcst_stlf_baseline_future$method)) +
@@ -434,11 +434,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_boot_stlf_baseline$lower, 
                                       ymax = fcst_boot_stlf_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_boot_stlf_future$mean,
                          ggplot2::aes(ymin = fcst_boot_stlf_future$lower, 
                                       ymax = fcst_boot_stlf_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and STLF") +
@@ -516,11 +516,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_boot_nnet_baseline$lower, 
                                       ymax = fcst_boot_nnet_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_boot_nnet_future$mean,
                          ggplot2::aes(ymin = fcst_boot_nnet_future$lower, 
                                       ymax = fcst_boot_nnet_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Actuals, baseline and forecasted baseline using bootstrap and NNAR") +
@@ -574,11 +574,11 @@ predict_baseline <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = lower_baseline, 
                                       ymax = upper_baseline),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = combined_future,
                          ggplot2::aes(ymin = lower_future, 
                                       ymax = upper_future),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::autolayer(ts_actuals, series = "Actuals") +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle("Average forecast of all combined models") +
@@ -757,11 +757,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = fcst_stl_arima_actuals$lower,
                                         ymax = fcst_stl_arima_actuals$upper),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
                            ggplot2::aes(ymin = fcst_stl_arima_future$lower,
                                         ymax = fcst_stl_arima_future$upper),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle(paste0("Actuals and forecasted total sales using ",
                               fcst_stl_arima_future$method)) +
@@ -803,11 +803,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = fcst_arima_actuals$lower, 
                                         ymax = fcst_arima_actuals$upper),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = fcst_arima_future$mean,
                            ggplot2::aes(ymin = fcst_arima_future$lower, 
                                         ymax = fcst_arima_future$upper),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle(paste0("Actuals and forecasted total sales using ",
                               fcst_arima_future$method)) +
@@ -847,11 +847,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = fcst_stlf_actuals$lower, 
                                         ymax = fcst_stlf_actuals$upper),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = fcst_stlf_future$mean,
                            ggplot2::aes(ymin = fcst_stlf_future$lower, 
                                         ymax = fcst_stlf_future$upper),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle(paste0("Actuals and forecasted total sales using ",
                               fcst_stlf_future$method)) +
@@ -969,11 +969,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = fcst_boot_stlf_actuals$lower, 
                                         ymax = fcst_boot_stlf_actuals$upper),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = fcst_boot_stlf_future$mean,
                            ggplot2::aes(ymin = fcst_boot_stlf_future$lower, 
                                         ymax = fcst_boot_stlf_future$upper),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle("Actuals and forecasted total sales using bootstrap and STLF") +
       ggplot2::xlab("Years") +
@@ -1053,11 +1053,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = fcst_boot_nnet_actuals$lower, 
                                         ymax = fcst_boot_nnet_actuals$upper),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = fcst_boot_nnet_future$mean,
                            ggplot2::aes(ymin = fcst_boot_nnet_future$lower, 
                                         ymax = fcst_boot_nnet_future$upper),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle("Actuals and forecasted total sales using bootstrap and Neural Network") +
       ggplot2::xlab("Years") +
@@ -1115,11 +1115,11 @@ predict_sales <- function(sales_data,
       ggplot2::geom_ribbon(data = ts_actuals_test,
                            ggplot2::aes(ymin = lower_actuals, 
                                         ymax = upper_actuals),
-                           fill = "blue", alpha = "0.3") +
+                           fill = "blue", alpha = 0.3) +
       ggplot2::geom_ribbon(data = combined_future,
                            ggplot2::aes(ymin = lower_future, 
                                         ymax = upper_future),
-                           fill = "red", alpha = "0.3") +
+                           fill = "red", alpha = 0.3) +
       ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
       ggplot2::ggtitle("Average forecast of all combined models") +
       ggplot2::xlab("Years") +
@@ -1169,11 +1169,11 @@ predict_sales <- function(sales_data,
         ggplot2::geom_ribbon(data = ts_actuals_test,
                              ggplot2::aes(ymin = fcst_dyna_actuals$lower, 
                                           ymax = fcst_dyna_actuals$upper),
-                             fill = "blue", alpha = "0.3") +
+                             fill = "blue", alpha = 0.3) +
         ggplot2::geom_ribbon(data = fcst_dyna_future$mean,
                              ggplot2::aes(ymin = fcst_dyna_future$lower, 
                                           ymax = fcst_dyna_future$upper),
-                             fill = "red", alpha = "0.3") +
+                             fill = "red", alpha = 0.3) +
         ggplot2::scale_color_manual(values = c("black", "red", "blue")) +
         ggplot2::ggtitle("Actuals and forecasted total sales using a dynamic model") +
         ggplot2::xlab("Years") +
@@ -1462,11 +1462,11 @@ predict_baseline_fast <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_stl_arima_baseline$lower,
                                       ymax = fcst_stl_arima_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_stl_arima_future$mean,
                          ggplot2::aes(ymin = fcst_stl_arima_future$lower, 
                                       ymax = fcst_stl_arima_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
                             fcst_stl_arima_future$method)) +
@@ -1513,11 +1513,11 @@ predict_baseline_fast <- function(sales_data,
     ggplot2::geom_ribbon(data = ts_baseline_test,
                          ggplot2::aes(ymin = fcst_stlf_baseline$lower,
                                       ymax = fcst_stlf_baseline$upper),
-                         fill = "blue", alpha = "0.3") +
+                         fill = "blue", alpha = 0.3) +
     ggplot2::geom_ribbon(data = fcst_stlf_baseline_future$mean,
                          ggplot2::aes(ymin = fcst_stlf_baseline_future$lower,
                                       ymax = fcst_stlf_baseline_future$upper),
-                         fill = "red", alpha = "0.3") +
+                         fill = "red", alpha = 0.3) +
     ggplot2::scale_color_manual(values = c("black", "grey", "blue", "red")) +
     ggplot2::ggtitle(paste0("Actuals, baseline and forecasted baseline using \n ",
                             fcst_stlf_baseline_future$method)) +
