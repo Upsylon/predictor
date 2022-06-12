@@ -13,7 +13,11 @@ The slides of the presentation are available [here](https://github.com/Upsylon/p
 3. Present the results visually and interactively  
 --> This package comes with a [ **Shiny App**](https://upsy.shinyapps.io/Predictor/)
 
-The package includes an outlier detection algorithm. But also the use of many time-series predictive models (ARIMA, STLF, ETS, Neural-Networks). .
+The methodology includes:  
+- An outlier detection algorithm.  
+- Predictive models:  
+     - Time-Series: ARIMA, STLF, ETS  
+     - Machine Learning: Neural-Networks  
 
 ## Downloading the package :cd:
 
