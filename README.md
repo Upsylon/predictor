@@ -10,7 +10,7 @@ The slides of the presentation are available [here](https://github.com/Upsylon/p
 --> Based on historical sales data, forecasts are computed automatically.  
 2. Ensure a reproducible methodology.   
 --> The library provides a variety of easily usable functions
-3. Present the results visually and interactively 
+3. Present the results visually and interactively  
 --> This package comes with a [ **Shiny App**](https://upsy.shinyapps.io/Predictor/)
 
 The package includes an outlier detection algorithm. But also the use of many time-series predictive models (ARIMA, STLF, ETS, Neural-Networks). .
