@@ -1,26 +1,19 @@
 ## Context :books:
 
-This package has been built as part of my Master Thesis in the *Business Analytics* orientation of the Master in Management at HEC Lausanne, for which I obtained the grade of 6/6.  
-The slides of the presentation are available in this repository.
+This package comes with my Master Thesis in *Business Analytics* orientation of the Master in Management at HEC Lausanne.  
+I obtained the grade of 6/6.  
+The slides of the presentation are available [here](https://github.com/Upsylon/predictor/blob/master/Thesis%20presentation.pdf).
 
 ## Objectives of the package :dart:
 
-The objective package is designed to **automate the forecasting process** of sales.   
-Based on historical sales data, the forecasts are computed automatically.  
+1. Automate the forecasting process of time series  
+--> Based on historical sales data, forecasts are computed automatically.  
+2. Ensure a reproducible methodology.   
+--> The library provides a variety of easily usable functions
+3. Present the results visually and interactively 
+--> This package comes with a [ **Shiny App**](https://upsy.shinyapps.io/Predictor/)
 
-It implements a complete procedure that leads to accurate results using a **reproducible methodology**.   
-Finally, it makes the life of the user simpler by **minimizing the code** needed.     
-
-It includes an outlier detection algorithm and the use of multiple predictive models (ARIMA, STLF, ETS, Neural-Networks). The performance of each model is then evaluated. The best model is selected and the predictions are computed.
-
-This package comes with a **Shiny App**:  
-https://upsy.shinyapps.io/Predictor/
-
-With its ease of use, the Shiny App would enable a baby to make accurate predictions! :grin:  
-The user can **load data**, **vizualize** the shape of the predictions and **download** the results.   
-The default parameters ensure a meaningful initial setting that the user is free to change. All this **without any code**.
-
-The "Sample.csv" file in this repository can be used for demonstration purpose. 
+The package includes an outlier detection algorithm. But also the use of many time-series predictive models (ARIMA, STLF, ETS, Neural-Networks). .
 
 ## Downloading the package :cd:
 
@@ -36,7 +29,5 @@ library(predictor) # load the package
 
 ## Utilisation :computer:
 
-The package is composed of multiple function. Their objectives and utilisation is detailed in their description.
-
-
+The package is composed of different functions. Their objectives and utilisation is detailed in their description.
 
